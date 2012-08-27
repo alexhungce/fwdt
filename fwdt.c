@@ -65,7 +65,7 @@ static ssize_t acpi_read_pci_data(struct device *dev, struct device_attribute *a
 
 	pci_read_config_dword(pdev, pci_dev_info.reg, &data);
 
-	return sprintf(buf, "%08x\n", data);;
+	return sprintf(buf, "0x%08x\n", data);;
 }
 
 static ssize_t acpi_write_pci_data(struct device *dev, struct device_attribute *attr,
