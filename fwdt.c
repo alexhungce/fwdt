@@ -42,14 +42,14 @@ static struct platform_driver fwdt_driver = {
 
 static struct platform_device *fwdt_platform_dev;
 
-static int offset;
+static int ec_offset;
 static ssize_t acpi_read_ec_data(struct device *dev, struct device_attribute *attr,
 			char *buf)
 {
 	int ret;
 	u8 data;
 
-	ret = ec_read(offset, &data);
+	ret = ec_read(ec_offset, &data);
 	if (ret)
 		return -EINVAL;
 
@@ -63,7 +63,7 @@ static ssize_t acpi_write_ec_data(struct device *dev, struct device_attribute *a
 	u8 data;
 
 	data = simple_strtoul(buf, NULL, 16);
-	ret = ec_write(offset, data);
+	ret = ec_write(ec_offset, data);
 	if (ret)
 		return -EINVAL;
 
@@ -75,13 +75,13 @@ static DEVICE_ATTR(ec_data, S_IRUGO | S_IWUSR, acpi_read_ec_data, acpi_write_ec_
 static ssize_t acpi_read_ec_addr(struct device *dev, struct device_attribute *attr,
 			char *buf)
 {
-	return sprintf(buf, "0x%02x\n", offset);;
+	return sprintf(buf, "0x%02x\n", ec_offset);;
 }
 
 static ssize_t acpi_write_ec_addr(struct device *dev, struct device_attribute *attr,
 			const char *buf, size_t count)
 {
-	offset = simple_strtoul(buf, NULL, 16);
+	ec_offset = simple_strtoul(buf, NULL, 16);
 	return count;
 }
 
