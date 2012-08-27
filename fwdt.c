@@ -23,6 +23,7 @@
 #include <linux/platform_device.h>
 #include <linux/acpi.h>
 #include <acpi/acpi_drivers.h>
+#include <linux/pci.h>
 
 MODULE_AUTHOR("Alex Hung");
 MODULE_DESCRIPTION("FWDT Driver");
@@ -41,6 +42,86 @@ static struct platform_driver fwdt_driver = {
 };
 
 static struct platform_device *fwdt_platform_dev;
+
+static struct {
+	u16 vendor_id;
+	u16 device_id;
+	u8 reg;
+} pci_dev_info;
+
+static ssize_t acpi_read_pci_data(struct device *dev, struct device_attribute *attr,
+			char *buf)
+{
+	struct pci_dev *pdev = NULL;
+	int data;
+
+	pdev = pci_get_subsys(pci_dev_info.vendor_id, pci_dev_info.device_id,
+				PCI_ANY_ID, PCI_ANY_ID, NULL);
+	if (pdev == NULL) {
+		pr_info("pci device [%x:%x] is not found\n", 
+			pci_dev_info.vendor_id, pci_dev_info.device_id);
+		return -EINVAL;
+	}
+
+	pci_read_config_dword(pdev, pci_dev_info.reg, &data);
+
+	return sprintf(buf, "%08x\n", data);;
+}
+
+static ssize_t acpi_write_pci_data(struct device *dev, struct device_attribute *attr,
+			const char *buf, size_t count)
+{
+	struct pci_dev *pdev = NULL;
+	int data;
+
+	data = simple_strtoul(buf, NULL, 16) & 0xFFFFFFFF;
+	pdev = pci_get_subsys(pci_dev_info.vendor_id, pci_dev_info.device_id,
+				PCI_ANY_ID, PCI_ANY_ID, NULL);
+	pci_write_config_dword(pdev, pci_dev_info.reg, data);
+	
+	return count;
+}
+
+static DEVICE_ATTR(pci_data, S_IRUGO | S_IWUSR, acpi_read_pci_data, acpi_write_pci_data);
+
+static ssize_t acpi_read_pci_reg(struct device *dev, struct device_attribute *attr,
+			char *buf)
+{
+	return sprintf(buf, "%x\n", pci_dev_info.reg);;
+}
+
+static ssize_t acpi_write_pci_reg(struct device *dev, struct device_attribute *attr,
+			const char *buf, size_t count)
+{
+	pci_dev_info.reg = simple_strtoul(buf, NULL, 16) & 0xFF;
+	return count;
+}
+
+static DEVICE_ATTR(pci_reg, S_IRUGO | S_IWUSR, acpi_read_pci_reg, acpi_write_pci_reg);
+
+static ssize_t acpi_read_pci_id(struct device *dev, struct device_attribute *attr,
+			char *buf)
+{
+	u32 pci_id;
+
+	pci_id= (pci_dev_info.vendor_id << 16) + (pci_dev_info.device_id);
+
+	return sprintf(buf, "0x%08x\n", pci_id);;
+}
+
+static ssize_t acpi_write_pci_id(struct device *dev, struct device_attribute *attr,
+			const char *buf, size_t count)
+{
+	long pci_id;
+
+	pci_id = simple_strtoul(buf, NULL, 16);
+	pci_dev_info.vendor_id = (pci_id & 0xFFFF0000) >> 16;
+	pci_dev_info.device_id = (pci_id & 0x0000FFFF);
+
+	return count;
+}
+
+static DEVICE_ATTR(pci_id, S_IRUGO | S_IWUSR, acpi_read_pci_id, acpi_write_pci_id);
 
 static int ec_offset;
 static ssize_t acpi_read_ec_data(struct device *dev, struct device_attribute *attr,
@@ -89,6 +170,9 @@ static DEVICE_ATTR(ec_addr, S_IRUGO | S_IWUSR, acpi_read_ec_addr, acpi_write_ec_
 
 static void cleanup_sysfs(struct platform_device *device)
 {
+	 device_remove_file(&device->dev, &dev_attr_pci_id);
+	 device_remove_file(&device->dev, &dev_attr_pci_reg);
+	 device_remove_file(&device->dev, &dev_attr_pci_data);
 	 device_remove_file(&device->dev, &dev_attr_ec_addr);
 	 device_remove_file(&device->dev, &dev_attr_ec_data);
 }
@@ -97,6 +181,15 @@ static int __devinit fwdt_setup(struct platform_device *device)
 {
 	int err;
 
+	err = device_create_file(&device->dev, &dev_attr_pci_id);
+	if (err)
+		goto add_sysfs_error;
+	err = device_create_file(&device->dev, &dev_attr_pci_reg);
+	if (err)
+		goto add_sysfs_error;
+	err = device_create_file(&device->dev, &dev_attr_pci_data);
+	if (err)
+		goto add_sysfs_error;
 	err = device_create_file(&device->dev, &dev_attr_ec_addr);
 	if (err)
 		goto add_sysfs_error;
