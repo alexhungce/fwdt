@@ -115,8 +115,8 @@ static ssize_t acpi_write_pci_id(struct device *dev, struct device_attribute *at
 	long pci_id;
 
 	pci_id = simple_strtoul(buf, NULL, 16);
-	pci_dev_info.vendor_id = (pci_id & 0xFFFF0000) >> 16;
-	pci_dev_info.device_id = (pci_id & 0x0000FFFF);
+	pci_dev_info.device_id = (pci_id & 0xFFFF0000) >> 16;
+	pci_dev_info.vendor_id = (pci_id & 0x0000FFFF);
 
 	return count;
 }
