@@ -41,9 +41,9 @@ static struct platform_driver fwdt_driver = {
 };
 
 static struct platform_device *fwdt_platform_dev;
-static int offset;
 
-static ssize_t acpi_read_ec(struct device *dev, struct device_attribute *attr,
+static int offset;
+static ssize_t acpi_read_ec_data(struct device *dev, struct device_attribute *attr,
 			char *buf)
 {
 	int ret;
@@ -56,26 +56,51 @@ static ssize_t acpi_read_ec(struct device *dev, struct device_attribute *attr,
 	return sprintf(buf, "%x\n", data);;
 }
 
-static ssize_t acpi_write_ec(struct device *dev, struct device_attribute *attr,
+static ssize_t acpi_write_ec_data(struct device *dev, struct device_attribute *attr,
 			const char *buf, size_t count)
 {
-	offset = simple_strtoul(buf, NULL, 16);
+	int ret;
+	u8 data;
+
+	data = simple_strtoul(buf, NULL, 16);
+	ret = ec_write(offset, data);
+	if (ret)
+		return -EINVAL;
 
 	return count;
 }
 
-static DEVICE_ATTR(ec, S_IRUGO | S_IWUSR, acpi_read_ec, acpi_write_ec);
+static DEVICE_ATTR(ec_data, S_IRUGO | S_IWUSR, acpi_read_ec_data, acpi_write_ec_data);
+
+static ssize_t acpi_read_ec_addr(struct device *dev, struct device_attribute *attr,
+			char *buf)
+{
+	return sprintf(buf, "0x%02x\n", offset);;
+}
+
+static ssize_t acpi_write_ec_addr(struct device *dev, struct device_attribute *attr,
+			const char *buf, size_t count)
+{
+	offset = simple_strtoul(buf, NULL, 16);
+	return count;
+}
+
+static DEVICE_ATTR(ec_addr, S_IRUGO | S_IWUSR, acpi_read_ec_addr, acpi_write_ec_addr);
 
 static void cleanup_sysfs(struct platform_device *device)
 {
-	 device_remove_file(&device->dev, &dev_attr_ec);
+	 device_remove_file(&device->dev, &dev_attr_ec_addr);
+	 device_remove_file(&device->dev, &dev_attr_ec_data);
 }
 
 static int __devinit fwdt_setup(struct platform_device *device)
 {
 	int err;
 
-	err = device_create_file(&device->dev, &dev_attr_ec);
+	err = device_create_file(&device->dev, &dev_attr_ec_addr);
+	if (err)
+		goto add_sysfs_error;
+	err = device_create_file(&device->dev, &dev_attr_ec_data);
 	if (err)
 		goto add_sysfs_error;
 
