@@ -43,6 +43,42 @@ static struct platform_driver fwdt_driver = {
 
 static struct platform_device *fwdt_platform_dev;
 
+static u16 iob_addr;
+static ssize_t iob_read_address(struct device *dev, struct device_attribute *attr,
+			char *buf)
+{
+	return sprintf(buf, "0x%04x\n", iob_addr);
+}
+
+static ssize_t iob_write_address(struct device *dev, struct device_attribute *attr,
+			const char *buf, size_t count)
+{
+	iob_addr = simple_strtoul(buf, NULL, 16) & 0xFFFF;
+	
+	return count;
+}
+
+static DEVICE_ATTR(iob_address, S_IRUGO | S_IWUSR, iob_read_address, iob_write_address);
+
+static ssize_t iob_read_data(struct device *dev, struct device_attribute *attr,
+			char *buf)
+{
+	return sprintf(buf, "0x%02x\n", inb(iob_addr));
+}
+
+static ssize_t iob_write_data(struct device *dev, struct device_attribute *attr,
+			const char *buf, size_t count)
+{
+	u8 data;
+
+	data = simple_strtoul(buf, NULL, 16);
+	outb(data, iob_addr);
+	
+	return count;
+}
+
+static DEVICE_ATTR(iob_data, S_IRUGO | S_IWUSR, iob_read_data, iob_write_data);
+
 static struct {
 	u16 vendor_id;
 	u16 device_id;
@@ -170,6 +206,8 @@ static DEVICE_ATTR(ec_addr, S_IRUGO | S_IWUSR, acpi_read_ec_addr, acpi_write_ec_
 
 static void cleanup_sysfs(struct platform_device *device)
 {
+	 device_remove_file(&device->dev, &dev_attr_iob_address);
+	 device_remove_file(&device->dev, &dev_attr_iob_data);
 	 device_remove_file(&device->dev, &dev_attr_pci_id);
 	 device_remove_file(&device->dev, &dev_attr_pci_reg);
 	 device_remove_file(&device->dev, &dev_attr_pci_data);
@@ -181,6 +219,12 @@ static int __devinit fwdt_setup(struct platform_device *device)
 {
 	int err;
 
+	err = device_create_file(&device->dev, &dev_attr_iob_address);
+	if (err)
+		goto add_sysfs_error;
+	err = device_create_file(&device->dev, &dev_attr_iob_data);
+	if (err)
+		goto add_sysfs_error;
 	err = device_create_file(&device->dev, &dev_attr_pci_id);
 	if (err)
 		goto add_sysfs_error;
