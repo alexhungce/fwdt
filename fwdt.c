@@ -46,10 +46,10 @@ static struct platform_device *fwdt_platform_dev;
 static struct {
 	u16 vendor_id;
 	u16 device_id;
-	u8 reg;
+	u8 reg_offset;
 } pci_dev_info;
 
-static ssize_t acpi_read_pci_data(struct device *dev, struct device_attribute *attr,
+static ssize_t pci_read_config_data(struct device *dev, struct device_attribute *attr,
 			char *buf)
 {
 	struct pci_dev *pdev = NULL;
@@ -63,12 +63,12 @@ static ssize_t acpi_read_pci_data(struct device *dev, struct device_attribute *a
 		return -EINVAL;
 	}
 
-	pci_read_config_dword(pdev, pci_dev_info.reg, &data);
+	pci_read_config_dword(pdev, pci_dev_info.reg_offset, &data);
 
 	return sprintf(buf, "0x%08x\n", data);;
 }
 
-static ssize_t acpi_write_pci_data(struct device *dev, struct device_attribute *attr,
+static ssize_t pci_write_config_data(struct device *dev, struct device_attribute *attr,
 			const char *buf, size_t count)
 {
 	struct pci_dev *pdev = NULL;
@@ -77,29 +77,29 @@ static ssize_t acpi_write_pci_data(struct device *dev, struct device_attribute *
 	data = simple_strtoul(buf, NULL, 16) & 0xFFFFFFFF;
 	pdev = pci_get_subsys(pci_dev_info.vendor_id, pci_dev_info.device_id,
 				PCI_ANY_ID, PCI_ANY_ID, NULL);
-	pci_write_config_dword(pdev, pci_dev_info.reg, data);
+	pci_write_config_dword(pdev, pci_dev_info.reg_offset, data);
 	
 	return count;
 }
 
-static DEVICE_ATTR(pci_data, S_IRUGO | S_IWUSR, acpi_read_pci_data, acpi_write_pci_data);
+static DEVICE_ATTR(pci_data, S_IRUGO | S_IWUSR, pci_read_config_data, pci_write_config_data);
 
-static ssize_t acpi_read_pci_reg(struct device *dev, struct device_attribute *attr,
+static ssize_t pci_read_config_offset(struct device *dev, struct device_attribute *attr,
 			char *buf)
 {
-	return sprintf(buf, "%x\n", pci_dev_info.reg);;
+	return sprintf(buf, "%x\n", pci_dev_info.reg_offset);;
 }
 
-static ssize_t acpi_write_pci_reg(struct device *dev, struct device_attribute *attr,
+static ssize_t pci_write_config_offset(struct device *dev, struct device_attribute *attr,
 			const char *buf, size_t count)
 {
-	pci_dev_info.reg = simple_strtoul(buf, NULL, 16) & 0xFF;
+	pci_dev_info.reg_offset = simple_strtoul(buf, NULL, 16) & 0xFF;
 	return count;
 }
 
-static DEVICE_ATTR(pci_reg, S_IRUGO | S_IWUSR, acpi_read_pci_reg, acpi_write_pci_reg);
+static DEVICE_ATTR(pci_reg, S_IRUGO | S_IWUSR, pci_read_config_offset, pci_write_config_offset);
 
-static ssize_t acpi_read_pci_id(struct device *dev, struct device_attribute *attr,
+static ssize_t pci_read_hardware_ids(struct device *dev, struct device_attribute *attr,
 			char *buf)
 {
 	u32 pci_id;
@@ -109,7 +109,7 @@ static ssize_t acpi_read_pci_id(struct device *dev, struct device_attribute *att
 	return sprintf(buf, "0x%08x\n", pci_id);;
 }
 
-static ssize_t acpi_write_pci_id(struct device *dev, struct device_attribute *attr,
+static ssize_t pci_write_hardware_ids(struct device *dev, struct device_attribute *attr,
 			const char *buf, size_t count)
 {
 	long pci_id;
@@ -121,7 +121,7 @@ static ssize_t acpi_write_pci_id(struct device *dev, struct device_attribute *at
 	return count;
 }
 
-static DEVICE_ATTR(pci_id, S_IRUGO | S_IWUSR, acpi_read_pci_id, acpi_write_pci_id);
+static DEVICE_ATTR(pci_id, S_IRUGO | S_IWUSR, pci_read_hardware_ids, pci_write_hardware_ids);
 
 static int ec_offset;
 static ssize_t acpi_read_ec_data(struct device *dev, struct device_attribute *attr,
