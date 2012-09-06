@@ -253,15 +253,19 @@ static DEVICE_ATTR(ec_addr, S_IRUGO | S_IWUSR, acpi_read_ec_addr, acpi_write_ec_
 
 static void cleanup_sysfs(struct platform_device *device)
 {
-	 device_remove_file(&device->dev, &dev_attr_iow_address);
-	 device_remove_file(&device->dev, &dev_attr_iow_data);
-	 device_remove_file(&device->dev, &dev_attr_iob_address);
-	 device_remove_file(&device->dev, &dev_attr_iob_data);
-	 device_remove_file(&device->dev, &dev_attr_pci_id);
-	 device_remove_file(&device->dev, &dev_attr_pci_reg);
-	 device_remove_file(&device->dev, &dev_attr_pci_data);
-	 device_remove_file(&device->dev, &dev_attr_ec_addr);
-	 device_remove_file(&device->dev, &dev_attr_ec_data);
+	device_remove_file(&device->dev, &dev_attr_iow_address);
+	device_remove_file(&device->dev, &dev_attr_iow_data);
+	device_remove_file(&device->dev, &dev_attr_iob_address);
+	device_remove_file(&device->dev, &dev_attr_iob_data);
+	device_remove_file(&device->dev, &dev_attr_pci_id);
+	device_remove_file(&device->dev, &dev_attr_pci_reg);
+	device_remove_file(&device->dev, &dev_attr_pci_data);
+
+	if (ec_device) {
+		device_remove_file(&device->dev, &dev_attr_ec_addr);
+		device_remove_file(&device->dev, &dev_attr_ec_data);
+		ec_device = NULL;
+	}
 }
 
 static int __devinit fwdt_setup(struct platform_device *device)
