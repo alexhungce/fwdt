@@ -24,6 +24,8 @@
 #include <linux/acpi.h>
 #include <acpi/acpi_drivers.h>
 #include <linux/pci.h>
+#include <acpi/acpi_bus.h>
+#include <acpi/video.h>
 
 MODULE_AUTHOR("Alex Hung");
 MODULE_DESCRIPTION("FWDT Driver");
@@ -42,6 +44,14 @@ static struct platform_driver fwdt_driver = {
 };
 
 static struct platform_device *fwdt_platform_dev;
+
+static acpi_status acpi_acpi_handle_locate_callback(acpi_handle handle,
+			u32 level, void *context, void **return_value)
+{
+	*(acpi_handle *)return_value = handle;
+
+	return AE_CTRL_TERMINATE;
+}
 
 static u16 iow_addr;
 static ssize_t iow_read_address(struct device *dev, struct device_attribute *attr,
@@ -195,6 +205,7 @@ static ssize_t pci_write_hardware_ids(struct device *dev, struct device_attribut
 
 static DEVICE_ATTR(pci_id, S_IRUGO | S_IWUSR, pci_read_hardware_ids, pci_write_hardware_ids);
 
+static acpi_handle ec_device = NULL;
 static int ec_offset;
 static ssize_t acpi_read_ec_data(struct device *dev, struct device_attribute *attr,
 			char *buf)
@@ -256,6 +267,7 @@ static void cleanup_sysfs(struct platform_device *device)
 static int __devinit fwdt_setup(struct platform_device *device)
 {
 	int err;
+	acpi_status status;
 
 	err = device_create_file(&device->dev, &dev_attr_iow_address);
 	if (err)
@@ -278,12 +290,21 @@ static int __devinit fwdt_setup(struct platform_device *device)
 	err = device_create_file(&device->dev, &dev_attr_pci_data);
 	if (err)
 		goto add_sysfs_error;
-	err = device_create_file(&device->dev, &dev_attr_ec_addr);
-	if (err)
-		goto add_sysfs_error;
-	err = device_create_file(&device->dev, &dev_attr_ec_data);
-	if (err)
-		goto add_sysfs_error;
+
+	status = acpi_get_devices("PNP0C09", acpi_acpi_handle_locate_callback,
+				  NULL, &ec_device);
+	if (ACPI_SUCCESS(status)) {
+		if (!ec_device)
+			goto add_sysfs_done;
+		err = device_create_file(&device->dev, &dev_attr_ec_addr);
+		if (err)
+			goto add_sysfs_error;
+		err = device_create_file(&device->dev, &dev_attr_ec_data);
+		if (err)
+			goto add_sysfs_error;
+	}
+
+add_sysfs_done:
 
 	return 0;
 
