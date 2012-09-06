@@ -251,6 +251,27 @@ static ssize_t acpi_write_ec_addr(struct device *dev, struct device_attribute *a
 
 static DEVICE_ATTR(ec_addr, S_IRUGO | S_IWUSR, acpi_read_ec_addr, acpi_write_ec_addr);
 
+static ssize_t acpi_write_ec_qxx(struct device *dev, struct device_attribute *attr,
+			const char *buf, size_t count)
+{
+	acpi_status status;
+	u8 data;
+	char q_num[5];
+
+	data = simple_strtoul(buf, NULL, 16);
+	sprintf(q_num, "_Q%02X", data);
+
+	status = acpi_evaluate_object(ec_device, q_num, NULL, NULL);
+	if (ACPI_SUCCESS(status))
+		printk("Executed %s\n", q_num);
+	else
+		printk("Failed to execute %sn", q_num);
+
+	return count;
+}
+
+static DEVICE_ATTR(ec_qmethod, S_IWUSR, NULL, acpi_write_ec_qxx);
+
 static void cleanup_sysfs(struct platform_device *device)
 {
 	device_remove_file(&device->dev, &dev_attr_iow_address);
@@ -264,6 +285,7 @@ static void cleanup_sysfs(struct platform_device *device)
 	if (ec_device) {
 		device_remove_file(&device->dev, &dev_attr_ec_addr);
 		device_remove_file(&device->dev, &dev_attr_ec_data);
+		device_remove_file(&device->dev, &dev_attr_ec_qmethod);
 		ec_device = NULL;
 	}
 }
@@ -304,6 +326,9 @@ static int __devinit fwdt_setup(struct platform_device *device)
 		if (err)
 			goto add_sysfs_error;
 		err = device_create_file(&device->dev, &dev_attr_ec_data);
+		if (err)
+			goto add_sysfs_error;
+		err = device_create_file(&device->dev, &dev_attr_ec_qmethod);
 		if (err)
 			goto add_sysfs_error;
 	}
