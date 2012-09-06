@@ -43,6 +43,42 @@ static struct platform_driver fwdt_driver = {
 
 static struct platform_device *fwdt_platform_dev;
 
+static u16 iow_addr;
+static ssize_t iow_read_address(struct device *dev, struct device_attribute *attr,
+			char *buf)
+{
+	return sprintf(buf, "0x%04x\n", iow_addr);
+}
+
+static ssize_t iow_write_address(struct device *dev, struct device_attribute *attr,
+			const char *buf, size_t count)
+{
+	iow_addr = simple_strtoul(buf, NULL, 16) & 0xFFFF;
+	
+	return count;
+}
+
+static DEVICE_ATTR(iow_address, S_IRUGO | S_IWUSR, iow_read_address, iow_write_address);
+
+static ssize_t iow_read_data(struct device *dev, struct device_attribute *attr,
+			char *buf)
+{
+	return sprintf(buf, "0x%04x\n", inw(iow_addr));
+}
+
+static ssize_t iow_write_data(struct device *dev, struct device_attribute *attr,
+			const char *buf, size_t count)
+{
+	u16 data;
+
+	data = simple_strtoul(buf, NULL, 16);
+	outw(data, iow_addr);
+	
+	return count;
+}
+
+static DEVICE_ATTR(iow_data, S_IRUGO | S_IWUSR, iow_read_data, iow_write_data);
+
 static u16 iob_addr;
 static ssize_t iob_read_address(struct device *dev, struct device_attribute *attr,
 			char *buf)
@@ -206,6 +242,8 @@ static DEVICE_ATTR(ec_addr, S_IRUGO | S_IWUSR, acpi_read_ec_addr, acpi_write_ec_
 
 static void cleanup_sysfs(struct platform_device *device)
 {
+	 device_remove_file(&device->dev, &dev_attr_iow_address);
+	 device_remove_file(&device->dev, &dev_attr_iow_data);
 	 device_remove_file(&device->dev, &dev_attr_iob_address);
 	 device_remove_file(&device->dev, &dev_attr_iob_data);
 	 device_remove_file(&device->dev, &dev_attr_pci_id);
@@ -219,6 +257,12 @@ static int __devinit fwdt_setup(struct platform_device *device)
 {
 	int err;
 
+	err = device_create_file(&device->dev, &dev_attr_iow_address);
+	if (err)
+		goto add_sysfs_error;
+	err = device_create_file(&device->dev, &dev_attr_iow_data);
+	if (err)
+		goto add_sysfs_error;
 	err = device_create_file(&device->dev, &dev_attr_iob_address);
 	if (err)
 		goto add_sysfs_error;
