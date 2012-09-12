@@ -265,7 +265,7 @@ static ssize_t acpi_write_ec_qxx(struct device *dev, struct device_attribute *at
 	if (ACPI_SUCCESS(status))
 		printk("Executed %s\n", q_num);
 	else
-		printk("Failed to execute %sn", q_num);
+		printk("Failed to execute %s\n", q_num);
 
 	return count;
 }
