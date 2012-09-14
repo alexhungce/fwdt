@@ -159,8 +159,12 @@ static ssize_t pci_write_config_data(struct device *dev, struct device_attribute
 	data = simple_strtoul(buf, NULL, 16) & 0xFFFFFFFF;
 	pdev = pci_get_subsys(pci_dev_info.vendor_id, pci_dev_info.device_id,
 				PCI_ANY_ID, PCI_ANY_ID, NULL);
-	pci_write_config_dword(pdev, pci_dev_info.reg_offset, data);
-	
+	if (pdev)
+		pci_write_config_dword(pdev, pci_dev_info.reg_offset, data);
+	else 
+		pr_info("pci device [%x:%x] is not found\n", 
+			pci_dev_info.vendor_id, pci_dev_info.device_id);
+
 	return count;
 }
 
