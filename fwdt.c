@@ -53,6 +53,38 @@ static acpi_status acpi_acpi_handle_locate_callback(acpi_handle handle,
 	return AE_CTRL_TERMINATE;
 }
 
+static u32 mem_addr;
+static ssize_t mem_read_address(struct device *dev, struct device_attribute *attr,
+			char *buf)
+{
+	return sprintf(buf, "0x%08x\n", mem_addr);
+}
+
+static ssize_t mem_write_address(struct device *dev, struct device_attribute *attr,
+			const char *buf, size_t count)
+{
+	mem_addr = simple_strtoul(buf, NULL, 16);
+	
+	return count;
+}
+
+static DEVICE_ATTR(mem_address, S_IRUGO | S_IWUSR, mem_read_address, mem_write_address);
+
+static ssize_t mem_read_data(struct device *dev, struct device_attribute *attr,
+			char *buf)
+{
+	u32 *mem;
+	u32 data;
+
+	mem = ioremap(mem_addr, 8);
+	data = *mem;
+	iounmap(mem);
+
+	return sprintf(buf, "0x%08x\n", data);
+}
+
+static DEVICE_ATTR(mem_data, S_IRUGO, mem_read_data, NULL);
+
 static u16 iow_addr;
 static ssize_t iow_read_address(struct device *dev, struct device_attribute *attr,
 			char *buf)
@@ -278,6 +310,8 @@ static DEVICE_ATTR(ec_qmethod, S_IWUSR, NULL, acpi_write_ec_qxx);
 
 static void cleanup_sysfs(struct platform_device *device)
 {
+	device_remove_file(&device->dev, &dev_attr_mem_address);
+	device_remove_file(&device->dev, &dev_attr_mem_data);
 	device_remove_file(&device->dev, &dev_attr_iow_address);
 	device_remove_file(&device->dev, &dev_attr_iow_data);
 	device_remove_file(&device->dev, &dev_attr_iob_address);
@@ -299,6 +333,12 @@ static int __devinit fwdt_setup(struct platform_device *device)
 	int err;
 	acpi_status status;
 
+	err = device_create_file(&device->dev, &dev_attr_mem_address);
+	if (err)
+		goto add_sysfs_error;
+	err = device_create_file(&device->dev, &dev_attr_mem_data);
+	if (err)
+		goto add_sysfs_error;
 	err = device_create_file(&device->dev, &dev_attr_iow_address);
 	if (err)
 		goto add_sysfs_error;
