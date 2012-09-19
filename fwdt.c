@@ -83,7 +83,22 @@ static ssize_t mem_read_data(struct device *dev, struct device_attribute *attr,
 	return sprintf(buf, "0x%08x\n", data);
 }
 
-static DEVICE_ATTR(mem_data, S_IRUGO, mem_read_data, NULL);
+static ssize_t mem_write_data(struct device *dev, struct device_attribute *attr,
+			const char *buf, size_t count)
+{
+	u32 *mem;
+	u32 data;
+
+	data = simple_strtoul(buf, NULL, 16) & 0xFFFFFFFF;
+	
+	mem = ioremap(mem_addr, 8);
+	*mem = data;
+	iounmap(mem);
+
+	return count;
+}
+
+static DEVICE_ATTR(mem_data, S_IRUGO | S_IWUSR, mem_read_data, mem_write_data);
 
 static u16 iow_addr;
 static ssize_t iow_read_address(struct device *dev, struct device_attribute *attr,
