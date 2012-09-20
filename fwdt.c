@@ -53,6 +53,67 @@ static acpi_status acpi_acpi_handle_locate_callback(acpi_handle handle,
 	return AE_CTRL_TERMINATE;
 }
 
+static acpi_handle video_device;
+static ssize_t acpi_video_write_device(struct device *dev, struct device_attribute *attr,
+			const char *buf, size_t count)
+{
+	acpi_status status;
+	char device_path[255];
+	
+	device_path[0] = '\\';
+	strncpy(device_path + 1, buf, strlen(buf));	
+	device_path[strlen(buf)] = 0;
+
+	status = acpi_get_handle(NULL, device_path, &video_device);
+	if (!ACPI_SUCCESS(status))
+		printk("Failed to find video device: %s!\n", buf);
+
+	return count;
+}
+
+static DEVICE_ATTR(video_device, S_IWUSR, NULL, acpi_video_write_device);
+
+static ssize_t acpi_video_read_brightness(struct device *dev, struct device_attribute *attr,
+			char *buf)
+{
+	acpi_status status;
+	unsigned long long bqc_level;
+
+	if (!video_device) {
+		printk("acpi_video device is not specified!\n");
+		return -ENODEV;
+	}
+
+	status = acpi_evaluate_integer(video_device, "_BQC", NULL, &bqc_level);
+	if (!ACPI_SUCCESS(status))
+		printk("Failed to read brightness level!\n");
+
+	return sprintf(buf, "%lld\n", bqc_level);
+}
+
+static ssize_t acpi_video_write_brightness(struct device *dev, struct device_attribute *attr,
+			const char *buf, size_t count)
+{
+	acpi_status status;
+	union acpi_object arg0 = { ACPI_TYPE_INTEGER };
+	struct acpi_object_list args = { 1, &arg0 };
+
+	if (!video_device) {
+		printk("acpi_video device is not specified!\n");
+		return count;
+	}
+
+	arg0.integer.value = simple_strtoul(buf, NULL, 10);
+
+	status = acpi_evaluate_object(video_device, "_BCM", &args, NULL);
+	if (!ACPI_SUCCESS(status))
+		printk("Failed to set brightness level!\n");
+
+	return count;
+}
+
+static DEVICE_ATTR(video_brightness, S_IRUGO | S_IWUSR, acpi_video_read_brightness, acpi_video_write_brightness);
+
 static u32 mem_addr;
 static ssize_t mem_read_address(struct device *dev, struct device_attribute *attr,
 			char *buf)
@@ -325,6 +386,8 @@ static DEVICE_ATTR(ec_qmethod, S_IWUSR, NULL, acpi_write_ec_qxx);
 
 static void cleanup_sysfs(struct platform_device *device)
 {
+	device_remove_file(&device->dev, &dev_attr_video_device);
+	device_remove_file(&device->dev, &dev_attr_video_brightness);
 	device_remove_file(&device->dev, &dev_attr_mem_address);
 	device_remove_file(&device->dev, &dev_attr_mem_data);
 	device_remove_file(&device->dev, &dev_attr_iow_address);
@@ -334,6 +397,9 @@ static void cleanup_sysfs(struct platform_device *device)
 	device_remove_file(&device->dev, &dev_attr_pci_id);
 	device_remove_file(&device->dev, &dev_attr_pci_reg);
 	device_remove_file(&device->dev, &dev_attr_pci_data);
+
+	if (video_device)
+		video_device = NULL;
 
 	if (ec_device) {
 		device_remove_file(&device->dev, &dev_attr_ec_address);
@@ -348,6 +414,12 @@ static int __devinit fwdt_setup(struct platform_device *device)
 	int err;
 	acpi_status status;
 
+	err = device_create_file(&device->dev, &dev_attr_video_device);
+	if (err)
+		goto add_sysfs_error;
+	err = device_create_file(&device->dev, &dev_attr_video_brightness);
+	if (err)
+		goto add_sysfs_error;
 	err = device_create_file(&device->dev, &dev_attr_mem_address);
 	if (err)
 		goto add_sysfs_error;
