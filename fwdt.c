@@ -53,6 +53,35 @@ static acpi_status acpi_acpi_handle_locate_callback(acpi_handle handle,
 	return AE_CTRL_TERMINATE;
 }
 
+static int acpi_lcd_query_levels(acpi_handle *device,
+				   union acpi_object **levels)
+{
+	int status;
+	struct acpi_buffer buffer = { ACPI_ALLOCATE_BUFFER, NULL };
+	union acpi_object *obj;
+
+	*levels = NULL;
+
+	status = acpi_evaluate_object(device, "_BCL", NULL, &buffer);
+	if (!ACPI_SUCCESS(status))
+		return status;
+	obj = (union acpi_object *)buffer.pointer;
+	if (!obj || (obj->type != ACPI_TYPE_PACKAGE)) {
+		printk("Invalid _BCL data\n");
+		status = -EFAULT;
+		goto err;
+	}
+
+	*levels = obj;
+
+	return 0;
+
+      err:
+	kfree(buffer.pointer);
+
+	return status;
+}
+
 static acpi_handle video_device;
 static ssize_t acpi_video_write_device(struct device *dev, struct device_attribute *attr,
 			const char *buf, size_t count)
@@ -78,6 +107,9 @@ static ssize_t acpi_video_read_brightness(struct device *dev, struct device_attr
 {
 	acpi_status status;
 	unsigned long long bqc_level;
+	union acpi_object *obj;
+	union acpi_object *o;
+	int i;
 
 	if (!video_device) {
 		printk("acpi_video device is not specified!\n");
@@ -89,6 +121,20 @@ static ssize_t acpi_video_read_brightness(struct device *dev, struct device_attr
 		printk("Failed to read brightness level!\n");
 		return -ENODEV;
 	}
+
+	if (!ACPI_SUCCESS(acpi_lcd_query_levels(video_device, &obj))) {
+		printk("Failed to query brightness levels\n");
+		goto no_bcl;
+	}
+
+	for (i = 0; i < obj->package.count; i++) {
+		o =  (union acpi_object *) &obj->package.elements[i];
+		if (o->type != ACPI_TYPE_INTEGER)
+			continue;
+		printk("Brightness[%d] = %d\n", i, (u32) o->integer.value);
+	}
+
+      no_bcl:
 
 	return sprintf(buf, "%lld\n", bqc_level);
 }
