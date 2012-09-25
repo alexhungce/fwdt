@@ -85,8 +85,10 @@ static ssize_t acpi_video_read_brightness(struct device *dev, struct device_attr
 	}
 
 	status = acpi_evaluate_integer(video_device, "_BQC", NULL, &bqc_level);
-	if (!ACPI_SUCCESS(status))
+	if (!ACPI_SUCCESS(status)) {
 		printk("Failed to read brightness level!\n");
+		return -ENODEV;
+	}
 
 	return sprintf(buf, "%lld\n", bqc_level);
 }
