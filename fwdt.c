@@ -53,6 +53,40 @@ static acpi_status acpi_acpi_handle_locate_callback(acpi_handle handle,
 	return AE_CTRL_TERMINATE;
 }
 
+static void acpi_device_path(const char *buf, char *path)
+{
+	path[0] = '\\';
+	strncpy(path + 1, buf, strlen(buf));	
+	path[strlen(buf)] = 0;
+}
+
+static ssize_t acpi_generic_function_0_0_write_device(struct device *dev, struct device_attribute *attr,
+			const char *buf, size_t count)
+{
+	acpi_handle device;
+	acpi_status status;
+	char path[255];
+
+	acpi_device_path(buf, path);
+
+	status = acpi_get_handle(NULL, path, &device);
+	if (!ACPI_SUCCESS(status)) {
+		printk("Failed to find acpi method: %s\n", path);
+		goto err;
+	}
+
+	status = acpi_evaluate_object(NULL, path, NULL, NULL);
+	if (ACPI_SUCCESS(status))
+		printk("Executed %s\n", path);
+	else
+		printk("Failed to execute %s\n", path);
+
+      err:
+	return count;
+}
+
+static DEVICE_ATTR(acpi_function_0_0, S_IWUSR, NULL, acpi_generic_function_0_0_write_device);
+
 static int acpi_lcd_query_levels(acpi_handle *device,
 				   union acpi_object **levels)
 {
@@ -434,6 +468,7 @@ static DEVICE_ATTR(ec_qmethod, S_IWUSR, NULL, acpi_write_ec_qxx);
 
 static void cleanup_sysfs(struct platform_device *device)
 {
+	device_remove_file(&device->dev, &dev_attr_acpi_function_0_0);
 	device_remove_file(&device->dev, &dev_attr_video_device);
 	device_remove_file(&device->dev, &dev_attr_video_brightness);
 	device_remove_file(&device->dev, &dev_attr_mem_address);
@@ -462,6 +497,9 @@ static int __devinit fwdt_setup(struct platform_device *device)
 	int err;
 	acpi_status status;
 
+	err = device_create_file(&device->dev, &dev_attr_acpi_function_0_0);
+	if (err)
+		goto add_sysfs_error;
 	err = device_create_file(&device->dev, &dev_attr_video_device);
 	if (err)
 		goto add_sysfs_error;
