@@ -84,8 +84,40 @@ static ssize_t acpi_generic_function_0_0_write_device(struct device *dev, struct
       err:
 	return count;
 }
-
 static DEVICE_ATTR(acpi_function_0_0, S_IWUSR, NULL, acpi_generic_function_0_0_write_device);
+
+static char device_path_0_1[256];
+static ssize_t acpi_generic_function_0_1_read(struct device *dev, struct device_attribute *attr,
+			char *buf)
+{
+	acpi_status status;
+	unsigned long long output;
+
+	status = acpi_evaluate_integer(NULL, device_path_0_1, NULL, &output);
+	if (ACPI_SUCCESS(status))
+		printk("Executed %s\n", device_path_0_1);
+	else
+		printk("Failed to execute %s\n", device_path_0_1);
+
+	return sprintf(buf, "0x%08llx\n", output);
+}
+
+static ssize_t acpi_generic_function_0_1_write(struct device *dev, struct device_attribute *attr,
+			const char *buf, size_t count)
+{
+	acpi_handle device;
+	acpi_status status;
+
+	acpi_device_path(buf, device_path_0_1);
+
+	status = acpi_get_handle(NULL, device_path_0_1, &device);
+	if (!ACPI_SUCCESS(status)) {
+		printk("Failed to find acpi method: %s\n", device_path_0_1);
+	}
+
+	return count;
+}
+static DEVICE_ATTR(acpi_function_0_1, S_IRUGO | S_IWUSR, acpi_generic_function_0_1_read, acpi_generic_function_0_1_write);
 
 static int acpi_lcd_query_levels(acpi_handle *device,
 				   union acpi_object **levels)
@@ -468,6 +500,7 @@ static DEVICE_ATTR(ec_qmethod, S_IWUSR, NULL, acpi_write_ec_qxx);
 
 static void cleanup_sysfs(struct platform_device *device)
 {
+	device_remove_file(&device->dev, &dev_attr_acpi_function_0_1);
 	device_remove_file(&device->dev, &dev_attr_acpi_function_0_0);
 	device_remove_file(&device->dev, &dev_attr_video_device);
 	device_remove_file(&device->dev, &dev_attr_video_brightness);
@@ -497,6 +530,9 @@ static int __devinit fwdt_setup(struct platform_device *device)
 	int err;
 	acpi_status status;
 
+	err = device_create_file(&device->dev, &dev_attr_acpi_function_0_1);
+	if (err)
+		goto add_sysfs_error;
 	err = device_create_file(&device->dev, &dev_attr_acpi_function_0_0);
 	if (err)
 		goto add_sysfs_error;
