@@ -60,7 +60,7 @@ static void acpi_device_path(const char *buf, char *path)
 	path[strlen(buf)] = 0;
 }
 
-static ssize_t acpi_generic_function_0_0_write_device(struct device *dev, struct device_attribute *attr,
+static ssize_t acpi_generic_function_0_0_write(struct device *dev, struct device_attribute *attr,
 			const char *buf, size_t count)
 {
 	acpi_handle device;
@@ -84,7 +84,7 @@ static ssize_t acpi_generic_function_0_0_write_device(struct device *dev, struct
       err:
 	return count;
 }
-static DEVICE_ATTR(acpi_function_0_0, S_IWUSR, NULL, acpi_generic_function_0_0_write_device);
+static DEVICE_ATTR(acpi_function_0_0, S_IWUSR, NULL, acpi_generic_function_0_0_write);
 
 static char device_path_0_1[256];
 static ssize_t acpi_generic_function_0_1_read(struct device *dev, struct device_attribute *attr,
