@@ -26,6 +26,10 @@
 #include <linux/pci.h>
 #include <acpi/acpi_bus.h>
 #include <acpi/video.h>
+#include <linux/proc_fs.h>
+#include <linux/miscdevice.h>
+
+#include "fwdt.h"
 
 MODULE_AUTHOR("Alex Hung");
 MODULE_DESCRIPTION("FWDT Driver");
@@ -498,6 +502,40 @@ static ssize_t acpi_write_ec_qxx(struct device *dev, struct device_attribute *at
 
 static DEVICE_ATTR(ec_qmethod, S_IWUSR, NULL, acpi_write_ec_qxx);
 
+static long fwdt_runtime_ioctl(struct file *file, unsigned int cmd,
+							unsigned long arg)
+{
+	switch (cmd) {
+	default:
+		break;
+	}
+	return 0;
+}
+
+static int fwdt_runtime_open(struct inode *inode, struct file *file)
+{
+	return 0;
+}
+
+static int fwdt_runtime_close(struct inode *inode, struct file *file)
+{
+	return 0;
+}
+
+static const struct file_operations fwdt_runtime_fops = {
+	.owner		= THIS_MODULE,
+	.unlocked_ioctl = fwdt_runtime_ioctl,
+	.open		= fwdt_runtime_open,
+	.release	= fwdt_runtime_close,
+	.llseek		= no_llseek,
+};
+
+static struct miscdevice fwdt_runtime_dev = {
+	MISC_DYNAMIC_MINOR,
+	"fwdt",
+	&fwdt_runtime_fops
+};
+
 static void cleanup_sysfs(struct platform_device *device)
 {
 	device_remove_file(&device->dev, &dev_attr_acpi_function_0_1);
@@ -618,6 +656,13 @@ static int __init fwdt_init(void)
 	if (err)
 		goto err_device_add;
 
+	err = misc_register(&fwdt_runtime_dev);
+	if (err) {
+		printk(KERN_ERR "fwdt: can't misc_register on minor=%d\n",
+					MISC_DYNAMIC_MINOR);
+		goto err_driver_reg;
+	}
+
 	return 0;
 
 err_device_add:
@@ -636,6 +681,8 @@ static void __exit fwdt_exit(void)
 		platform_device_unregister(fwdt_platform_dev);
 		platform_driver_unregister(&fwdt_driver);
 	} 
+
+	misc_deregister(&fwdt_runtime_dev);
 }
 
 module_init(fwdt_init);
