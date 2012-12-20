@@ -17,6 +17,9 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
+
+#define pr_fmt(fmt) "fwdt: " fmt
+
 #include <linux/kernel.h>
 #include <linux/module.h>
 #include <linux/init.h>
@@ -502,14 +505,134 @@ static ssize_t acpi_write_ec_qxx(struct device *dev, struct device_attribute *at
 
 static DEVICE_ATTR(ec_qmethod, S_IWUSR, NULL, acpi_write_ec_qxx);
 
+static int get_acpi_vga_brightness(fwdt_brightness *fb)
+{
+	int status;
+	unsigned long long bqc_level;
+	acpi_handle lcd_device;
+
+	status = acpi_get_handle(NULL, fb->lcd_path, &lcd_device);
+	if (!ACPI_SUCCESS(status)) {
+		pr_info("Failed to find acpi lcd device: %s\n", fb->lcd_path);
+		fb->parameters.func_status = FWDT_DEVICE_NOT_FOUND;
+		goto err;
+	}
+
+	status = acpi_evaluate_integer(lcd_device, "_BQC", NULL, &bqc_level);
+	if (!ACPI_SUCCESS(status)) {
+		pr_info("Failed to read brightness level!\n");
+		fb->parameters.func_status = FWDT_FAIL;
+		goto err;
+	}
+
+	fb->brightness_level = bqc_level;
+	fb->parameters.func_status = FWDT_SUCCESS;
+ err:
+	return status;
+}
+
+static int set_acpi_vga_brightness(fwdt_brightness *fb)
+{
+	int status;
+	acpi_handle lcd_device;
+
+	union acpi_object arg0 = { ACPI_TYPE_INTEGER };
+	struct acpi_object_list args = { 1, &arg0 };
+
+	arg0.integer.value = fb->brightness_level;
+
+	status = acpi_get_handle(NULL, fb->lcd_path, &lcd_device);
+	if (!ACPI_SUCCESS(status)) {
+		pr_info("Failed to find acpi lcd device: %s\n", fb->lcd_path);
+		fb->parameters.func_status = FWDT_DEVICE_NOT_FOUND;
+		goto err;
+	}
+
+	status = acpi_evaluate_object(lcd_device, "_BCM", &args, NULL);
+	if (!ACPI_SUCCESS(status)) {
+		pr_info("Failed to set brightness level!\n");
+		fb->parameters.func_status = FWDT_FAIL;
+		goto err;
+	}
+
+	fb->parameters.func_status = FWDT_SUCCESS;
+ err:
+	return status;
+}
+
+static int get_acpi_vga_br_levels(fwdt_brightness_levels *fbl)
+{
+	int status;
+	union acpi_object *obj, *o;
+	acpi_handle lcd_device;
+	int i;
+
+	status = acpi_get_handle(NULL, fbl->lcd_path, &lcd_device);
+	if (!ACPI_SUCCESS(status)) {
+		pr_info("Failed to find acpi lcd device: %s\n", fbl->lcd_path);
+		fbl->parameters.func_status = FWDT_DEVICE_NOT_FOUND;
+		goto err;
+	}
+
+	if (!ACPI_SUCCESS(acpi_lcd_query_levels(lcd_device, &obj))) {
+		printk("Failed to query brightness levels\n");
+		fbl->parameters.func_status = FWDT_FAIL;
+		goto err;
+	}
+
+	fbl->num_of_levels = obj->package.count;
+	for (i = 0; i < obj->package.count; i++) {
+		o =  (union acpi_object *) &obj->package.elements[i];
+		if (o->type != ACPI_TYPE_INTEGER)
+			continue;
+		fbl->levels[i] = (u32) o->integer.value;
+	}
+
+	fbl->parameters.func_status = FWDT_SUCCESS;
+ err:
+	return status;
+}
+
+static int handle_acpi_vga_cmd(fwdt_generic __user *fg) 
+{
+	int err;
+
+	switch (fg->parameters.func) {
+	case GET_BRIGHTNESS:
+		err = get_acpi_vga_brightness((fwdt_brightness*) fg);
+		break;	
+	case SET_BRIGHTNESS:
+		err = set_acpi_vga_brightness((fwdt_brightness*) fg);
+		break;	
+	case GET_BRIGHTNESS_LV:
+		err = get_acpi_vga_br_levels((fwdt_brightness_levels*) fg);
+		break;	
+/*
+	case GET_VIDEO_DEVICE:
+		break;	
+*/
+	default:
+		err = FWDT_FUNC_NOT_SUPPORTED;
+		break;
+	}
+
+	return err;
+}
+
 static long fwdt_runtime_ioctl(struct file *file, unsigned int cmd,
 							unsigned long arg)
 {
+	int err;
 	switch (cmd) {
+	case FWDT_ACPI_VGA_CMD:
+		err = handle_acpi_vga_cmd((fwdt_generic __user *) arg);
+		break;	
 	default:
+		err = FWDT_FUNC_NOT_SUPPORTED;
 		break;
 	}
-	return 0;
+
+	return err;
 }
 
 static int fwdt_runtime_open(struct inode *inode, struct file *file)
