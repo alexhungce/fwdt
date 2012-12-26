@@ -505,7 +505,7 @@ static ssize_t acpi_write_ec_qxx(struct device *dev, struct device_attribute *at
 
 static DEVICE_ATTR(ec_qmethod, S_IWUSR, NULL, acpi_write_ec_qxx);
 
-static int get_acpi_vga_brightness(fwdt_brightness *fb)
+static int get_acpi_vga_brightness(struct fwdt_brightness *fb)
 {
 	int status;
 	unsigned long long bqc_level;
@@ -531,7 +531,7 @@ static int get_acpi_vga_brightness(fwdt_brightness *fb)
 	return status;
 }
 
-static int set_acpi_vga_brightness(fwdt_brightness *fb)
+static int set_acpi_vga_brightness(struct fwdt_brightness *fb)
 {
 	int status;
 	acpi_handle lcd_device;
@@ -560,7 +560,7 @@ static int set_acpi_vga_brightness(fwdt_brightness *fb)
 	return status;
 }
 
-static int get_acpi_vga_br_levels(fwdt_brightness_levels *fbl)
+static int get_acpi_vga_br_levels(struct fwdt_brightness *fbl)
 {
 	int status;
 	union acpi_object *obj, *o;
@@ -599,13 +599,13 @@ static int handle_acpi_vga_cmd(fwdt_generic __user *fg)
 
 	switch (fg->parameters.func) {
 	case GET_BRIGHTNESS:
-		err = get_acpi_vga_brightness((fwdt_brightness*) fg);
+		err = get_acpi_vga_brightness((struct fwdt_brightness*) fg);
 		break;	
 	case SET_BRIGHTNESS:
-		err = set_acpi_vga_brightness((fwdt_brightness*) fg);
+		err = set_acpi_vga_brightness((struct fwdt_brightness*) fg);
 		break;	
 	case GET_BRIGHTNESS_LV:
-		err = get_acpi_vga_br_levels((fwdt_brightness_levels*) fg);
+		err = get_acpi_vga_br_levels((struct fwdt_brightness*) fg);
 		break;	
 /*
 	case GET_VIDEO_DEVICE:
@@ -619,13 +619,75 @@ static int handle_acpi_vga_cmd(fwdt_generic __user *fg)
 	return err;
 }
 
+static int handle_hardware_io_cmd(fwdt_generic __user *fg) 
+{
+	int ret = 0;
+	struct fwdt_io_data *fid = (struct fwdt_io_data*) fg;
+
+	switch (fg->parameters.func) {
+	case GET_DATA_BYTE:
+		fid->io_byte = inb(fid->io_address);
+		break;
+	case GET_DATA_WORD:
+		fid->io_word = inw(fid->io_address);
+		break;	
+	case SET_DATA_BYTE:
+		outb(fid->io_byte, fid->io_address);
+		break;
+	case SET_DATA_WORD:
+		outw(fid->io_word, fid->io_address);
+		break;	
+	default:
+		ret = FWDT_FUNC_NOT_SUPPORTED;
+		goto err;
+		break;
+	}
+
+	fid->parameters.func_status = FWDT_SUCCESS;
+ err:
+	return ret;
+}
+
+static int handle_hardware_memory_cmd(fwdt_generic __user *fg) 
+{
+	int ret = 0;
+	u64 *mem;
+	struct fwdt_mem_data *fmd = (struct fwdt_mem_data*) fg;
+
+	mem = ioremap(fmd->mem_address, 8);
+	switch (fg->parameters.func) {
+	case GET_DATA_DWORD:
+		fmd->mem_data = *mem;
+		break;	
+	case SET_DATA_DWORD:
+		*mem = fmd->mem_data;
+		break;	
+	default:
+		ret = FWDT_FUNC_NOT_SUPPORTED;
+		goto err;
+		break;
+	}
+
+	fmd->parameters.func_status = FWDT_SUCCESS;
+ err:
+	iounmap(mem);
+	return ret;
+}
+
 static long fwdt_runtime_ioctl(struct file *file, unsigned int cmd,
 							unsigned long arg)
 {
 	int err;
+
 	switch (cmd) {
 	case FWDT_ACPI_VGA_CMD:
 		err = handle_acpi_vga_cmd((fwdt_generic __user *) arg);
+		break;	
+	case FWDT_HW_ACCESS_IO_CMD:
+		err = handle_hardware_io_cmd((fwdt_generic __user *) arg);
+		break;
+	case FWDT_HW_ACCESS_MEMORY_CMD:
+		err = handle_hardware_memory_cmd((fwdt_generic __user *) arg);
 		break;	
 	default:
 		err = FWDT_FUNC_NOT_SUPPORTED;
