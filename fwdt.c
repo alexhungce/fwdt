@@ -52,7 +52,7 @@ static struct platform_driver fwdt_driver = {
 
 static struct platform_device *fwdt_platform_dev;
 
-static acpi_status acpi_acpi_handle_locate_callback(acpi_handle handle,
+static acpi_status acpi_handle_locate_callback(acpi_handle handle,
 			u32 level, void *context, void **return_value)
 {
 	*(acpi_handle *)return_value = handle;
@@ -793,7 +793,7 @@ static int fwdt_setup(struct platform_device *device)
 	if (err)
 		goto add_sysfs_error;
 
-	status = acpi_get_devices("PNP0C09", acpi_acpi_handle_locate_callback,
+	status = acpi_get_devices("PNP0C09", acpi_handle_locate_callback,
 				  NULL, &ec_device);
 	if (ACPI_SUCCESS(status)) {
 		if (!ec_device)
