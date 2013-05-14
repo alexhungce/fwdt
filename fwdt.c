@@ -38,7 +38,7 @@ MODULE_AUTHOR("Alex Hung");
 MODULE_DESCRIPTION("FWDT Driver");
 MODULE_LICENSE("GPL");
 
-static int __devinit fwdt_setup(struct platform_device *device);
+static int fwdt_setup(struct platform_device *device);
 static int __exit fwdt_remove(struct platform_device *device);
 
 static struct platform_driver fwdt_driver = {
@@ -748,7 +748,7 @@ static void cleanup_sysfs(struct platform_device *device)
 	}
 }
 
-static int __devinit fwdt_setup(struct platform_device *device)
+static int fwdt_setup(struct platform_device *device)
 {
 	int err;
 	acpi_status status;
