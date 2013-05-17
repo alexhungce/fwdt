@@ -482,19 +482,26 @@ static ssize_t pci_read_hardware_ids(struct device *dev, struct device_attribute
 {
 	u32 pci_id;
 
-	pci_id= (pci_dev_info.vendor_id << 16) + (pci_dev_info.device_id);
+	if (pci_dev_info.vendor_id == 0 || pci_dev_info.device_id == 0)
+		strcpy(buf,"ex. 8086:1c2d\n");
+	else
+		sprintf(buf, "%04x:%04x\n", pci_dev_info.vendor_id, pci_dev_info.device_id);
 
-	return sprintf(buf, "0x%08x\n", pci_id);;
+	return strlen(buf);
 }
 
 static ssize_t pci_write_hardware_ids(struct device *dev, struct device_attribute *attr,
 			const char *buf, size_t count)
 {
-	long pci_id;
+	long vendor_id, device_id;
 
-	pci_id = simple_strtoul(buf, NULL, 16);
-	pci_dev_info.device_id = (pci_id & 0xFFFF0000) >> 16;
-	pci_dev_info.vendor_id = (pci_id & 0x0000FFFF);
+	if (strlen(buf) > 10)
+		return 0;
+
+	sscanf(buf, "%4x:%4x\n", &vendor_id, &device_id);
+
+	pci_dev_info.device_id = device_id;
+	pci_dev_info.vendor_id = vendor_id;
 
 	return count;
 }
@@ -922,6 +929,8 @@ static int __init fwdt_init(void)
 					MISC_DYNAMIC_MINOR);
 		goto err_driver_reg;
 	}
+
+	memset(&pci_dev_info, 0, sizeof(pci_dev_info));
 
 	return 0;
 
