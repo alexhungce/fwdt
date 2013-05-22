@@ -480,9 +480,7 @@ static DEVICE_ATTR(pci_reg, S_IRUGO | S_IWUSR, pci_read_config_offset, pci_write
 static ssize_t pci_read_hardware_ids(struct device *dev, struct device_attribute *attr,
 			char *buf)
 {
-	u32 pci_id;
-
-	if (pci_dev_info.vendor_id == 0 || pci_dev_info.device_id == 0)
+	if (pci_dev_info.vendor_id == 0xFFFF || pci_dev_info.device_id == 0xFFFF)
 		strcpy(buf,"ex. 8086:1c2d\n");
 	else
 		sprintf(buf, "%04x:%04x\n", pci_dev_info.vendor_id, pci_dev_info.device_id);
@@ -930,7 +928,7 @@ static int __init fwdt_init(void)
 		goto err_driver_reg;
 	}
 
-	memset(&pci_dev_info, 0, sizeof(pci_dev_info));
+	memset(&pci_dev_info, 0xFF, sizeof(pci_dev_info));
 
 	return 0;
 
