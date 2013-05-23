@@ -491,7 +491,7 @@ static ssize_t pci_read_hardware_ids(struct device *dev, struct device_attribute
 static ssize_t pci_write_hardware_ids(struct device *dev, struct device_attribute *attr,
 			const char *buf, size_t count)
 {
-	long vendor_id, device_id;
+	unsigned int vendor_id, device_id;
 
 	if (strlen(buf) > 10)
 		return 0;
