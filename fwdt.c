@@ -222,8 +222,8 @@ static int acpi_lcd_query_levels(acpi_handle *device,
 }
 
 static acpi_handle video_device;
-static ssize_t acpi_video_write_device(struct device *dev, struct device_attribute *attr,
-			const char *buf, size_t count)
+static ssize_t acpi_video_write_device(struct device *dev,
+	struct device_attribute *attr, const char *buf, size_t count)
 {
 	acpi_status status;
 	char device_path[255];
@@ -241,8 +241,8 @@ static ssize_t acpi_video_write_device(struct device *dev, struct device_attribu
 
 static DEVICE_ATTR(video_device, S_IWUSR, NULL, acpi_video_write_device);
 
-static ssize_t acpi_video_read_brightness(struct device *dev, struct device_attribute *attr,
-			char *buf)
+static ssize_t acpi_video_read_brightness(struct device *dev,
+	struct device_attribute *attr, char *buf)
 {
 	acpi_status status;
 	unsigned long long bqc_level;
@@ -278,8 +278,8 @@ static ssize_t acpi_video_read_brightness(struct device *dev, struct device_attr
 	return sprintf(buf, "%lld\n", bqc_level);
 }
 
-static ssize_t acpi_video_write_brightness(struct device *dev, struct device_attribute *attr,
-			const char *buf, size_t count)
+static ssize_t acpi_video_write_brightness(struct device *dev,
+	struct device_attribute *attr, const char *buf, size_t count)
 {
 	acpi_status status;
 	union acpi_object arg0 = { ACPI_TYPE_INTEGER };
@@ -299,24 +299,26 @@ static ssize_t acpi_video_write_brightness(struct device *dev, struct device_att
 	return count;
 }
 
-static DEVICE_ATTR(video_brightness, S_IRUGO | S_IWUSR, acpi_video_read_brightness, acpi_video_write_brightness);
+static DEVICE_ATTR(video_brightness, S_IRUGO | S_IWUSR,
+	acpi_video_read_brightness, acpi_video_write_brightness);
 
 static u32 mem_addr;
-static ssize_t mem_read_address(struct device *dev, struct device_attribute *attr,
-			char *buf)
+static ssize_t mem_read_address(struct device *dev,
+	struct device_attribute *attr, char *buf)
 {
 	return sprintf(buf, "0x%08x\n", mem_addr);
 }
 
-static ssize_t mem_write_address(struct device *dev, struct device_attribute *attr,
-			const char *buf, size_t count)
+static ssize_t mem_write_address(struct device *dev,
+	struct device_attribute *attr, const char *buf, size_t count)
 {
 	mem_addr = simple_strtoul(buf, NULL, 16);
 	
 	return count;
 }
 
-static DEVICE_ATTR(mem_address, S_IRUGO | S_IWUSR, mem_read_address, mem_write_address);
+static DEVICE_ATTR(mem_address, S_IRUGO | S_IWUSR,
+		mem_read_address, mem_write_address);
 
 static ssize_t mem_read_data(struct device *dev, struct device_attribute *attr,
 			char *buf)
@@ -349,21 +351,22 @@ static ssize_t mem_write_data(struct device *dev, struct device_attribute *attr,
 static DEVICE_ATTR(mem_data, S_IRUGO | S_IWUSR, mem_read_data, mem_write_data);
 
 static u16 iow_addr;
-static ssize_t iow_read_address(struct device *dev, struct device_attribute *attr,
-			char *buf)
+static ssize_t iow_read_address(struct device *dev,
+	struct device_attribute *attr, char *buf)
 {
 	return sprintf(buf, "0x%04x\n", iow_addr);
 }
 
-static ssize_t iow_write_address(struct device *dev, struct device_attribute *attr,
-			const char *buf, size_t count)
+static ssize_t iow_write_address(struct device *dev,
+	struct device_attribute *attr, const char *buf, size_t count)
 {
 	iow_addr = simple_strtoul(buf, NULL, 16) & 0xFFFF;
 	
 	return count;
 }
 
-static DEVICE_ATTR(iow_address, S_IRUGO | S_IWUSR, iow_read_address, iow_write_address);
+static DEVICE_ATTR(iow_address, S_IRUGO | S_IWUSR,
+		iow_read_address, iow_write_address);
 
 static ssize_t iow_read_data(struct device *dev, struct device_attribute *attr,
 			char *buf)
@@ -385,21 +388,22 @@ static ssize_t iow_write_data(struct device *dev, struct device_attribute *attr,
 static DEVICE_ATTR(iow_data, S_IRUGO | S_IWUSR, iow_read_data, iow_write_data);
 
 static u16 iob_addr;
-static ssize_t iob_read_address(struct device *dev, struct device_attribute *attr,
-			char *buf)
+static ssize_t iob_read_address(struct device *dev,
+	struct device_attribute *attr, char *buf)
 {
 	return sprintf(buf, "0x%04x\n", iob_addr);
 }
 
-static ssize_t iob_write_address(struct device *dev, struct device_attribute *attr,
-			const char *buf, size_t count)
+static ssize_t iob_write_address(struct device *dev,
+	struct device_attribute *attr, const char *buf, size_t count)
 {
 	iob_addr = simple_strtoul(buf, NULL, 16) & 0xFFFF;
 	
 	return count;
 }
 
-static DEVICE_ATTR(iob_address, S_IRUGO | S_IWUSR, iob_read_address, iob_write_address);
+static DEVICE_ATTR(iob_address, S_IRUGO | S_IWUSR,
+		iob_read_address, iob_write_address);
 
 static ssize_t iob_read_data(struct device *dev, struct device_attribute *attr,
 			char *buf)
@@ -426,8 +430,8 @@ static struct {
 	u8 reg_offset;
 } pci_dev_info;
 
-static ssize_t pci_read_config_data(struct device *dev, struct device_attribute *attr,
-			char *buf)
+static ssize_t pci_read_config_data(struct device *dev,
+	struct device_attribute *attr, char *buf)
 {
 	struct pci_dev *pdev = NULL;
 	int data;
@@ -445,8 +449,8 @@ static ssize_t pci_read_config_data(struct device *dev, struct device_attribute 
 	return sprintf(buf, "0x%08x\n", data);;
 }
 
-static ssize_t pci_write_config_data(struct device *dev, struct device_attribute *attr,
-			const char *buf, size_t count)
+static ssize_t pci_write_config_data(struct device *dev,
+	struct device_attribute *attr, const char *buf, size_t count)
 {
 	struct pci_dev *pdev = NULL;
 	int data;
@@ -463,25 +467,27 @@ static ssize_t pci_write_config_data(struct device *dev, struct device_attribute
 	return count;
 }
 
-static DEVICE_ATTR(pci_data, S_IRUGO | S_IWUSR, pci_read_config_data, pci_write_config_data);
+static DEVICE_ATTR(pci_data, S_IRUGO | S_IWUSR,
+		pci_read_config_data, pci_write_config_data);
 
-static ssize_t pci_read_config_offset(struct device *dev, struct device_attribute *attr,
-			char *buf)
+static ssize_t pci_read_config_offset(struct device *dev,
+	struct device_attribute *attr, char *buf)
 {
 	return sprintf(buf, "%x\n", pci_dev_info.reg_offset);;
 }
 
-static ssize_t pci_write_config_offset(struct device *dev, struct device_attribute *attr,
-			const char *buf, size_t count)
+static ssize_t pci_write_config_offset(struct device *dev,
+	struct device_attribute *attr, const char *buf, size_t count)
 {
 	pci_dev_info.reg_offset = simple_strtoul(buf, NULL, 16) & 0xFF;
 	return count;
 }
 
-static DEVICE_ATTR(pci_reg, S_IRUGO | S_IWUSR, pci_read_config_offset, pci_write_config_offset);
+static DEVICE_ATTR(pci_reg, S_IRUGO | S_IWUSR,
+		pci_read_config_offset, pci_write_config_offset);
 
-static ssize_t pci_read_hardware_ids(struct device *dev, struct device_attribute *attr,
-			char *buf)
+static ssize_t pci_read_hardware_ids(struct device *dev,
+	struct device_attribute *attr, char *buf)
 {
 	if (pci_dev_info.vendor_id == 0xFFFF || pci_dev_info.device_id == 0xFFFF)
 		strcpy(buf,"ex. 8086:1c2d\n");
@@ -491,8 +497,8 @@ static ssize_t pci_read_hardware_ids(struct device *dev, struct device_attribute
 	return strlen(buf);
 }
 
-static ssize_t pci_write_hardware_ids(struct device *dev, struct device_attribute *attr,
-			const char *buf, size_t count)
+static ssize_t pci_write_hardware_ids(struct device *dev,
+	struct device_attribute *attr, const char *buf, size_t count)
 {
 	unsigned int vendor_id, device_id;
 
@@ -507,12 +513,13 @@ static ssize_t pci_write_hardware_ids(struct device *dev, struct device_attribut
 	return count;
 }
 
-static DEVICE_ATTR(pci_id, S_IRUGO | S_IWUSR, pci_read_hardware_ids, pci_write_hardware_ids);
+static DEVICE_ATTR(pci_id, S_IRUGO | S_IWUSR,
+	pci_read_hardware_ids, pci_write_hardware_ids);
 
 static acpi_handle ec_device = NULL;
 static int ec_offset;
-static ssize_t acpi_read_ec_data(struct device *dev, struct device_attribute *attr,
-			char *buf)
+static ssize_t acpi_read_ec_data(struct device *dev,
+	struct device_attribute *attr, char *buf)
 {
 	int ret;
 	u8 data;
@@ -524,8 +531,8 @@ static ssize_t acpi_read_ec_data(struct device *dev, struct device_attribute *at
 	return sprintf(buf, "%x\n", data);;
 }
 
-static ssize_t acpi_write_ec_data(struct device *dev, struct device_attribute *attr,
-			const char *buf, size_t count)
+static ssize_t acpi_write_ec_data(struct device *dev,
+	struct device_attribute *attr, const char *buf, size_t count)
 {
 	int ret;
 	u8 data;
@@ -538,25 +545,27 @@ static ssize_t acpi_write_ec_data(struct device *dev, struct device_attribute *a
 	return count;
 }
 
-static DEVICE_ATTR(ec_data, S_IRUGO | S_IWUSR, acpi_read_ec_data, acpi_write_ec_data);
+static DEVICE_ATTR(ec_data, S_IRUGO | S_IWUSR,
+		acpi_read_ec_data, acpi_write_ec_data);
 
-static ssize_t acpi_read_ec_addr(struct device *dev, struct device_attribute *attr,
-			char *buf)
+static ssize_t acpi_read_ec_addr(struct device *dev,
+	struct device_attribute *attr, char *buf)
 {
 	return sprintf(buf, "0x%02x\n", ec_offset);;
 }
 
-static ssize_t acpi_write_ec_addr(struct device *dev, struct device_attribute *attr,
-			const char *buf, size_t count)
+static ssize_t acpi_write_ec_addr(struct device *dev,
+	struct device_attribute *attr, const char *buf, size_t count)
 {
 	ec_offset = simple_strtoul(buf, NULL, 16);
 	return count;
 }
 
-static DEVICE_ATTR(ec_address, S_IRUGO | S_IWUSR, acpi_read_ec_addr, acpi_write_ec_addr);
+static DEVICE_ATTR(ec_address, S_IRUGO | S_IWUSR,
+		acpi_read_ec_addr, acpi_write_ec_addr);
 
-static ssize_t acpi_write_ec_qxx(struct device *dev, struct device_attribute *attr,
-			const char *buf, size_t count)
+static ssize_t acpi_write_ec_qxx(struct device *dev,
+	struct device_attribute *attr, const char *buf, size_t count)
 {
 	acpi_status status;
 	u8 data;
