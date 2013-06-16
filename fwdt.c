@@ -67,8 +67,8 @@ static void acpi_device_path(const char *buf, char *path)
 	path[strlen(buf)] = 0;
 }
 
-static ssize_t acpi_generic_function_0_0_write(struct device *dev, struct device_attribute *attr,
-			const char *buf, size_t count)
+static ssize_t acpi_method_0_0_write(struct device *dev,
+	struct device_attribute *attr, const char *buf, size_t count)
 {
 	acpi_handle device;
 	acpi_status status;
@@ -91,11 +91,11 @@ static ssize_t acpi_generic_function_0_0_write(struct device *dev, struct device
       err:
 	return count;
 }
-static DEVICE_ATTR(acpi_function_0_0, S_IWUSR, NULL, acpi_generic_function_0_0_write);
+static DEVICE_ATTR(acpi_method_0_0, S_IWUSR, NULL, acpi_method_0_0_write);
 
 static char device_path_0_1[256];
-static ssize_t acpi_generic_function_0_1_read(struct device *dev, struct device_attribute *attr,
-			char *buf)
+static ssize_t acpi_method_0_1_read(struct device *dev,
+	struct device_attribute *attr, char *buf)
 {
 	acpi_status status;
 	unsigned long long output;
@@ -109,8 +109,8 @@ static ssize_t acpi_generic_function_0_1_read(struct device *dev, struct device_
 	return sprintf(buf, "0x%08llx\n", output);
 }
 
-static ssize_t acpi_generic_function_0_1_write(struct device *dev, struct device_attribute *attr,
-			const char *buf, size_t count)
+static ssize_t acpi_method_0_1_write(struct device *dev,
+	struct device_attribute *attr, const char *buf, size_t count)
 {
 	acpi_handle device;
 	acpi_status status;
@@ -124,7 +124,8 @@ static ssize_t acpi_generic_function_0_1_write(struct device *dev, struct device
 
 	return count;
 }
-static DEVICE_ATTR(acpi_function_0_1, S_IRUGO | S_IWUSR, acpi_generic_function_0_1_read, acpi_generic_function_0_1_write);
+static DEVICE_ATTR(acpi_method_0_1, S_IRUGO | S_IWUSR,
+		acpi_method_0_1_read, acpi_method_0_1_write);
 
 static char acpi_method[256];
 static ssize_t acpi_method_read(struct device *dev,
@@ -149,7 +150,8 @@ static ssize_t acpi_method_write(struct device *dev,
 	return count;
 }
 
-static DEVICE_ATTR(acpi_method, S_IRUGO | S_IWUSR, acpi_method_read, acpi_method_write);
+static DEVICE_ATTR(acpi_method, S_IRUGO | S_IWUSR,
+		acpi_method_read, acpi_method_write);
 
 static u32 acpi_arg1;
 static ssize_t acpi_arg1_read(struct device *dev,
@@ -166,9 +168,10 @@ static ssize_t acpi_arg1_write(struct device *dev,
 	return count;
 }
 
-static DEVICE_ATTR(acpi_arg1, S_IRUGO | S_IWUSR, acpi_arg1_read, acpi_arg1_write);
+static DEVICE_ATTR(acpi_arg1, S_IRUGO | S_IWUSR,
+		acpi_arg1_read, acpi_arg1_write);
 
-static ssize_t acpi_function_1_1_read(struct device *dev,
+static ssize_t acpi_method_1_1_read(struct device *dev,
 		struct device_attribute *attr, char *buf)
 {
 	acpi_status status;
@@ -187,7 +190,7 @@ static ssize_t acpi_function_1_1_read(struct device *dev,
 	return sprintf(buf, "0x%08llx\n", output);
 }
 
-static DEVICE_ATTR(acpi_function_1_1, S_IRUGO, acpi_function_1_1_read, NULL);
+static DEVICE_ATTR(acpi_method_1_1, S_IRUGO, acpi_method_1_1_read, NULL);
 
 static int acpi_lcd_query_levels(acpi_handle *device,
 				   union acpi_object **levels)
@@ -793,9 +796,9 @@ static void cleanup_sysfs(struct platform_device *device)
 {
 	device_remove_file(&device->dev, &dev_attr_acpi_method);
 	device_remove_file(&device->dev, &dev_attr_acpi_arg1);
-	device_remove_file(&device->dev, &dev_attr_acpi_function_1_1);
-	device_remove_file(&device->dev, &dev_attr_acpi_function_0_1);
-	device_remove_file(&device->dev, &dev_attr_acpi_function_0_0);
+	device_remove_file(&device->dev, &dev_attr_acpi_method_1_1);
+	device_remove_file(&device->dev, &dev_attr_acpi_method_0_1);
+	device_remove_file(&device->dev, &dev_attr_acpi_method_0_0);
 	device_remove_file(&device->dev, &dev_attr_video_device);
 	device_remove_file(&device->dev, &dev_attr_video_brightness);
 	device_remove_file(&device->dev, &dev_attr_mem_address);
@@ -830,13 +833,13 @@ static int fwdt_setup(struct platform_device *device)
 	err = device_create_file(&device->dev, &dev_attr_acpi_arg1);
 	if (err)
 		goto add_sysfs_error;
-	err = device_create_file(&device->dev, &dev_attr_acpi_function_1_1);
+	err = device_create_file(&device->dev, &dev_attr_acpi_method_1_1);
 	if (err)
 		goto add_sysfs_error;
-	err = device_create_file(&device->dev, &dev_attr_acpi_function_0_1);
+	err = device_create_file(&device->dev, &dev_attr_acpi_method_0_1);
 	if (err)
 		goto add_sysfs_error;
-	err = device_create_file(&device->dev, &dev_attr_acpi_function_0_0);
+	err = device_create_file(&device->dev, &dev_attr_acpi_method_0_0);
 	if (err)
 		goto add_sysfs_error;
 	err = device_create_file(&device->dev, &dev_attr_video_device);
