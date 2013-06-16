@@ -425,10 +425,10 @@ static ssize_t iob_write_data(struct device *dev, struct device_attribute *attr,
 static DEVICE_ATTR(iob_data, S_IRUGO | S_IWUSR, iob_read_data, iob_write_data);
 
 static struct {
-	u16 vendor_id;
-	u16 device_id;
-	u8 reg_offset;
-} pci_dev_info;
+	u16 vid;
+	u16 did;
+	u8 offset;
+} pci_dev;
 
 static ssize_t pci_read_config_data(struct device *dev,
 	struct device_attribute *attr, char *buf)
@@ -436,15 +436,15 @@ static ssize_t pci_read_config_data(struct device *dev,
 	struct pci_dev *pdev = NULL;
 	int data;
 
-	pdev = pci_get_subsys(pci_dev_info.vendor_id, pci_dev_info.device_id,
+	pdev = pci_get_subsys(pci_dev.vid, pci_dev.did,
 				PCI_ANY_ID, PCI_ANY_ID, NULL);
 	if (pdev == NULL) {
 		pr_info("pci device [%04x:%04x] is not found\n", 
-			pci_dev_info.vendor_id, pci_dev_info.device_id);
+			pci_dev.vid, pci_dev.did);
 		return -EINVAL;
 	}
 
-	pci_read_config_dword(pdev, pci_dev_info.reg_offset, &data);
+	pci_read_config_dword(pdev, pci_dev.offset, &data);
 
 	return sprintf(buf, "0x%08x\n", data);;
 }
@@ -456,13 +456,13 @@ static ssize_t pci_write_config_data(struct device *dev,
 	int data;
 
 	data = simple_strtoul(buf, NULL, 16) & 0xFFFFFFFF;
-	pdev = pci_get_subsys(pci_dev_info.vendor_id, pci_dev_info.device_id,
+	pdev = pci_get_subsys(pci_dev.vid, pci_dev.did,
 				PCI_ANY_ID, PCI_ANY_ID, NULL);
 	if (pdev)
-		pci_write_config_dword(pdev, pci_dev_info.reg_offset, data);
+		pci_write_config_dword(pdev, pci_dev.offset, data);
 	else 
 		pr_info("pci device [%04x:%04x] is not found\n", 
-			pci_dev_info.vendor_id, pci_dev_info.device_id);
+			pci_dev.vid, pci_dev.did);
 
 	return count;
 }
@@ -473,13 +473,13 @@ static DEVICE_ATTR(pci_data, S_IRUGO | S_IWUSR,
 static ssize_t pci_read_config_offset(struct device *dev,
 	struct device_attribute *attr, char *buf)
 {
-	return sprintf(buf, "%x\n", pci_dev_info.reg_offset);;
+	return sprintf(buf, "%x\n", pci_dev.offset);
 }
 
 static ssize_t pci_write_config_offset(struct device *dev,
 	struct device_attribute *attr, const char *buf, size_t count)
 {
-	pci_dev_info.reg_offset = simple_strtoul(buf, NULL, 16) & 0xFF;
+	pci_dev.offset = simple_strtoul(buf, NULL, 16) & 0xFF;
 	return count;
 }
 
@@ -489,10 +489,10 @@ static DEVICE_ATTR(pci_reg, S_IRUGO | S_IWUSR,
 static ssize_t pci_read_hardware_ids(struct device *dev,
 	struct device_attribute *attr, char *buf)
 {
-	if (pci_dev_info.vendor_id == 0xFFFF || pci_dev_info.device_id == 0xFFFF)
+	if (pci_dev.vid == 0xFFFF || pci_dev.did == 0xFFFF)
 		strcpy(buf,"ex. 8086:1c2d\n");
 	else
-		sprintf(buf, "%04x:%04x\n", pci_dev_info.vendor_id, pci_dev_info.device_id);
+		sprintf(buf, "%04x:%04x\n", pci_dev.vid, pci_dev.did);
 
 	return strlen(buf);
 }
@@ -507,8 +507,8 @@ static ssize_t pci_write_hardware_ids(struct device *dev,
 
 	sscanf(buf, "%4x:%4x\n", &vendor_id, &device_id);
 
-	pci_dev_info.device_id = device_id;
-	pci_dev_info.vendor_id = vendor_id;
+	pci_dev.did = device_id;
+	pci_dev.vid = vendor_id;
 
 	return count;
 }
@@ -940,7 +940,7 @@ static int __init fwdt_init(void)
 		goto err_driver_reg;
 	}
 
-	memset(&pci_dev_info, 0xFF, sizeof(pci_dev_info));
+	memset(&pci_dev, 0xFF, sizeof(pci_dev));
 
 	return 0;
 
