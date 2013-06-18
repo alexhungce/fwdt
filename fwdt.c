@@ -153,22 +153,22 @@ static ssize_t acpi_method_write(struct device *dev,
 static DEVICE_ATTR(acpi_method, S_IRUGO | S_IWUSR,
 		acpi_method_read, acpi_method_write);
 
-static u32 acpi_arg1;
+static u32 acpi_arg0;
 static ssize_t acpi_arg1_read(struct device *dev,
 		struct device_attribute *attr, char *buf)
 {
-	return sprintf(buf, "0x%08x\n", acpi_arg1);
+	return sprintf(buf, "0x%08x\n", acpi_arg0);
 }
 
 static ssize_t acpi_arg1_write(struct device *dev,
 		struct device_attribute *attr, const char *buf, size_t count)
 {
-	acpi_arg1 = simple_strtoul(buf, NULL, 16);
+	acpi_arg0 = simple_strtoul(buf, NULL, 16);
 
 	return count;
 }
 
-static DEVICE_ATTR(acpi_arg1, S_IRUGO | S_IWUSR,
+static DEVICE_ATTR(acpi_arg0, S_IRUGO | S_IWUSR,
 		acpi_arg1_read, acpi_arg1_write);
 
 static ssize_t acpi_method_1_1_read(struct device *dev,
@@ -179,7 +179,7 @@ static ssize_t acpi_method_1_1_read(struct device *dev,
 	union acpi_object arg0 = { ACPI_TYPE_INTEGER };
 	struct acpi_object_list args = { 1, &arg0 };
 
-	arg0.integer.value = acpi_arg1;
+	arg0.integer.value = acpi_arg0;
 
 	status = acpi_evaluate_integer(NULL, acpi_method, &args, &output);
 	if (ACPI_SUCCESS(status))
@@ -804,7 +804,7 @@ static struct miscdevice fwdt_runtime_dev = {
 static void cleanup_sysfs(struct platform_device *device)
 {
 	device_remove_file(&device->dev, &dev_attr_acpi_method);
-	device_remove_file(&device->dev, &dev_attr_acpi_arg1);
+	device_remove_file(&device->dev, &dev_attr_acpi_arg0);
 	device_remove_file(&device->dev, &dev_attr_acpi_method_1_1);
 	device_remove_file(&device->dev, &dev_attr_acpi_method_0_1);
 	device_remove_file(&device->dev, &dev_attr_acpi_method_0_0);
@@ -839,7 +839,7 @@ static int fwdt_setup(struct platform_device *device)
 	err = device_create_file(&device->dev, &dev_attr_acpi_method);
 	if (err)
 		goto add_sysfs_error;
-	err = device_create_file(&device->dev, &dev_attr_acpi_arg1);
+	err = device_create_file(&device->dev, &dev_attr_acpi_arg0);
 	if (err)
 		goto add_sysfs_error;
 	err = device_create_file(&device->dev, &dev_attr_acpi_method_1_1);
