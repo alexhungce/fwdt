@@ -31,6 +31,7 @@
 #include <acpi/video.h>
 #include <linux/proc_fs.h>
 #include <linux/miscdevice.h>
+#include <asm/time.h>
 
 #include "fwdt.h"
 
@@ -585,6 +586,26 @@ static ssize_t acpi_write_ec_qxx(struct device *dev,
 
 static DEVICE_ATTR(ec_qmethod, S_IWUSR, NULL, acpi_write_ec_qxx);
 
+static int cmos_offset;
+static ssize_t cmos_read_data(struct device *dev,
+	struct device_attribute *attr, char *buf)
+{
+	if (cmos_offset > 0xFF)
+		return -EINVAL;
+
+	return sprintf(buf, "0x%02x\n", CMOS_READ(cmos_offset));
+}
+
+static ssize_t cmos_write_addr(struct device *dev,
+	struct device_attribute *attr, const char *buf, size_t count)
+{
+	if (kstrtoint(buf, 16, &cmos_offset))
+		return -EINVAL;
+	return count;
+}
+
+static DEVICE_ATTR(cmos, S_IRUGO | S_IWUSR, cmos_read_data, cmos_write_addr);
+
 static int get_acpi_vga_brightness(struct fwdt_brightness *fb)
 {
 	int status;
@@ -819,6 +840,7 @@ static void cleanup_sysfs(struct platform_device *device)
 	device_remove_file(&device->dev, &dev_attr_pci_id);
 	device_remove_file(&device->dev, &dev_attr_pci_reg);
 	device_remove_file(&device->dev, &dev_attr_pci_data);
+	device_remove_file(&device->dev, &dev_attr_cmos);
 
 	if (video_device)
 		video_device = NULL;
@@ -882,6 +904,9 @@ static int fwdt_setup(struct platform_device *device)
 	if (err)
 		goto add_sysfs_error;
 	err = device_create_file(&device->dev, &dev_attr_pci_data);
+	if (err)
+		goto add_sysfs_error;
+	err = device_create_file(&device->dev, &dev_attr_cmos);
 	if (err)
 		goto add_sysfs_error;
 
