@@ -56,6 +56,12 @@ struct fwdt_mem_data {
 	u32		mem_data;
 } __attribute__ ((packed));
 
+struct fwdt_cmos_data {
+	fwdt_parameter	parameters;
+	u8		cmos_address;
+	u8		cmos_data;
+} __attribute__ ((packed));
+
 typedef struct {
 	fwdt_parameter	parameters;
 } fwdt_generic;
@@ -69,5 +75,8 @@ typedef struct {
 
 #define FWDT_HW_ACCESS_MEMORY_CMD \
         _IOWR('p', 0x03, struct fwdt_mem_data)
+
+#define FWDT_HW_ACCESS_CMOS_CMD \
+        _IOWR('p', 0x04, struct fwdt_cmos_data)
 
 #endif
