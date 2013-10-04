@@ -1,7 +1,10 @@
-obj-m += fwdt.o
-
 all:
-	make -C /lib/modules/`uname -r`/build M=`pwd` modules
+	make -C src
+	make -C apps hp_cmos
+	mkdir -p bin
+	install src/fwdt.ko bin/
+	install apps/hp_cmos bin/
 
 clean:
-	make -C /lib/modules/`uname -r`/build M=`pwd` clean
+	make -C src clean
+	rm -f apps/hp_cmos bin/*
