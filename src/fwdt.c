@@ -156,13 +156,13 @@ static DEVICE_ATTR(acpi_method, S_IRUGO | S_IWUSR,
 		acpi_method_read, acpi_method_write);
 
 static u32 acpi_arg0;
-static ssize_t acpi_arg1_read(struct device *dev,
+static ssize_t acpi_arg0_read(struct device *dev,
 		struct device_attribute *attr, char *buf)
 {
 	return sprintf(buf, "0x%08x\n", acpi_arg0);
 }
 
-static ssize_t acpi_arg1_write(struct device *dev,
+static ssize_t acpi_arg0_write(struct device *dev,
 		struct device_attribute *attr, const char *buf, size_t count)
 {
 	acpi_arg0 = simple_strtoul(buf, NULL, 16);
@@ -171,7 +171,7 @@ static ssize_t acpi_arg1_write(struct device *dev,
 }
 
 static DEVICE_ATTR(acpi_arg0, S_IRUGO | S_IWUSR,
-		acpi_arg1_read, acpi_arg1_write);
+		acpi_arg0_read, acpi_arg0_write);
 
 static ssize_t acpi_method_1_1_read(struct device *dev,
 		struct device_attribute *attr, char *buf)
