@@ -147,7 +147,43 @@ static ssize_t acpi_arg0_write(struct device *dev,
 static DEVICE_ATTR(acpi_arg0, S_IRUGO | S_IWUSR,
 		acpi_arg0_read, acpi_arg0_write);
 
-static char acpi_method_1_1[256];
+static char acpi_method_1_x[256];
+static ssize_t acpi_method_1_0_read(struct device *dev,
+		struct device_attribute *attr, char *buf)
+{
+	acpi_status status;
+	union acpi_object arg0 = { ACPI_TYPE_INTEGER };
+	struct acpi_object_list args = { 1, &arg0 };
+
+	arg0.integer.value = acpi_arg0;
+	status = acpi_evaluate_object(NULL, acpi_method_1_x, &args, NULL);
+	if (ACPI_SUCCESS(status))
+		printk("Executed %s\n", acpi_method_1_x);
+	else
+		printk("Failed to execute %s\n", acpi_method_1_x);
+
+	return sprintf(buf, "0x%08x\n", ACPI_SUCCESS(status));
+}
+
+static ssize_t acpi_method_1_0_write(struct device *dev,
+		struct device_attribute *attr, const char *buf, size_t count)
+{
+	acpi_handle device;
+	acpi_status status;
+
+	acpi_device_path(buf, acpi_method_1_x);
+
+	status = acpi_get_handle(NULL, acpi_method_1_x, &device);
+	if (!ACPI_SUCCESS(status)) {
+		printk("Failed to find acpi method: %s\n", acpi_method_1_x);
+	}
+
+	return count;
+}
+
+static DEVICE_ATTR(acpi_method_1_0, S_IRUGO | S_IWUSR,
+		acpi_method_1_0_read, acpi_method_1_0_write);
+
 static ssize_t acpi_method_1_1_read(struct device *dev,
 		struct device_attribute *attr, char *buf)
 {
@@ -158,11 +194,11 @@ static ssize_t acpi_method_1_1_read(struct device *dev,
 
 	arg0.integer.value = acpi_arg0;
 
-	status = acpi_evaluate_integer(NULL, acpi_method_1_1, &args, &output);
+	status = acpi_evaluate_integer(NULL, acpi_method_1_x, &args, &output);
 	if (ACPI_SUCCESS(status))
-		printk("Executed %s\n", acpi_method_1_1);
+		printk("Executed %s\n", acpi_method_1_x);
 	else
-		printk("Failed to execute %s\n", acpi_method_1_1);
+		printk("Failed to execute %s\n", acpi_method_1_x);
 
 	return sprintf(buf, "0x%08llx\n", output);
 }
@@ -174,11 +210,11 @@ static ssize_t acpi_method_1_1_write(struct device *dev,
 	acpi_handle device;
 	acpi_status status;
 
-	acpi_device_path(buf, acpi_method_1_1);
+	acpi_device_path(buf, acpi_method_1_x);
 
-	status = acpi_get_handle(NULL, acpi_method_1_1, &device);
+	status = acpi_get_handle(NULL, acpi_method_1_x, &device);
 	if (!ACPI_SUCCESS(status)) {
-		printk("Failed to find acpi method: %s\n", acpi_method_1_1);
+		printk("Failed to find acpi method: %s\n", acpi_method_1_x);
 	}
 
 	return count;
@@ -862,6 +898,7 @@ static struct miscdevice fwdt_runtime_dev = {
 static void cleanup_sysfs(struct platform_device *device)
 {
 	device_remove_file(&device->dev, &dev_attr_acpi_arg0);
+	device_remove_file(&device->dev, &dev_attr_acpi_method_1_0);
 	device_remove_file(&device->dev, &dev_attr_acpi_method_1_1);
 	device_remove_file(&device->dev, &dev_attr_acpi_method_0_1);
 	device_remove_file(&device->dev, &dev_attr_acpi_method_0_0);
@@ -896,6 +933,9 @@ static int fwdt_setup(struct platform_device *device)
 	acpi_status status;
 
 	err = device_create_file(&device->dev, &dev_attr_acpi_arg0);
+	if (err)
+		goto add_sysfs_error;
+	err = device_create_file(&device->dev, &dev_attr_acpi_method_1_0);
 	if (err)
 		goto add_sysfs_error;
 	err = device_create_file(&device->dev, &dev_attr_acpi_method_1_1);
