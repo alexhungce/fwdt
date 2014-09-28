@@ -9,6 +9,11 @@ enum fwdt_acpi_vga_sub_cmd {
 	GET_VIDEO_DEVICE	=	0x04,
 };
 
+enum fwdt_acpi_ec_sub_cmd {
+	GET_EC_REGISTER		= 	0x01,
+	SET_EC_REGISTER		=	0x02,
+};
+
 enum fwdt_hw_access_sub_cmd {
 	GET_DATA_BYTE		= 	0x01,
 	SET_DATA_BYTE		=	0x02,
@@ -62,6 +67,12 @@ struct fwdt_cmos_data {
 	u8		cmos_data;
 } __attribute__ ((packed));
 
+struct fwdt_ec_data {
+	fwdt_parameter	parameters;
+	u8		address;
+	u8		data;
+} __attribute__ ((packed));
+
 typedef struct {
 	fwdt_parameter	parameters;
 } fwdt_generic;
@@ -79,4 +90,6 @@ typedef struct {
 #define FWDT_HW_ACCESS_CMOS_CMD \
         _IOWR('p', 0x04, struct fwdt_cmos_data)
 
+#define FWDT_ACPI_EC_CMD \
+        _IOWR('p', 0x05, struct fwdt_brightness)
 #endif

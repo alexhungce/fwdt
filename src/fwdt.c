@@ -770,6 +770,32 @@ static int handle_acpi_vga_cmd(fwdt_generic __user *fg)
 	return err;
 }
 
+static int handle_acpi_ec_cmd(fwdt_generic __user *fg)
+{
+	int err;
+	struct fwdt_ec_data *fec = (struct fwdt_ec_data*) fg;
+	struct fwdt_ec_data ecd;
+
+	if (copy_from_user(&ecd, fec, sizeof(struct fwdt_ec_data)))
+		return -EFAULT;
+
+	switch (fg->parameters.func) {
+	case GET_EC_REGISTER:
+		err = ec_read(ecd.address, &ecd.data);
+		if (copy_to_user(fec, &ecd, sizeof(struct fwdt_ec_data)))
+			return -EFAULT;
+		break;
+	case SET_EC_REGISTER:
+		err = ec_write(ecd.address, ecd.data);
+		break;
+	default:
+		err = FWDT_FUNC_NOT_SUPPORTED;
+		break;
+	}
+
+	return err;
+}
+
 static int handle_hardware_io_cmd(fwdt_generic __user *fg) 
 {
 	int ret = 0;
@@ -863,6 +889,9 @@ static long fwdt_runtime_ioctl(struct file *file, unsigned int cmd,
 	case FWDT_HW_ACCESS_CMOS_CMD:
 		err = handle_hardware_cmos_cmd((fwdt_generic __user *) arg);
 		break;	
+	case FWDT_ACPI_EC_CMD:
+		err = handle_acpi_ec_cmd((fwdt_generic __user *) arg);
+		break;
 	default:
 		err = FWDT_FUNC_NOT_SUPPORTED;
 		break;
