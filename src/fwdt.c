@@ -799,20 +799,23 @@ static int handle_acpi_ec_cmd(fwdt_generic __user *fg)
 static int handle_hardware_io_cmd(fwdt_generic __user *fg) 
 {
 	int ret = 0;
-	struct fwdt_io_data *fid = (struct fwdt_io_data*) fg;
+	struct fwdt_io_data fid;
+
+	if (copy_from_user(&fid, fg, sizeof(struct fwdt_io_data)))
+		return -EFAULT;
 
 	switch (fg->parameters.func) {
 	case GET_DATA_BYTE:
-		fid->io_byte = inb(fid->io_address);
+		fid.io_byte = inb(fid.io_address);
 		break;
 	case GET_DATA_WORD:
-		fid->io_word = inw(fid->io_address);
+		fid.io_word = inw(fid.io_address);
 		break;	
 	case SET_DATA_BYTE:
-		outb(fid->io_byte, fid->io_address);
+		outb(fid.io_byte, fid.io_address);
 		break;
 	case SET_DATA_WORD:
-		outw(fid->io_word, fid->io_address);
+		outw(fid.io_word, fid.io_address);
 		break;	
 	default:
 		ret = FWDT_FUNC_NOT_SUPPORTED;
@@ -820,7 +823,11 @@ static int handle_hardware_io_cmd(fwdt_generic __user *fg)
 		break;
 	}
 
-	fid->parameters.func_status = FWDT_SUCCESS;
+	fid.parameters.func_status = FWDT_SUCCESS;
+
+	if (copy_to_user(fg, &fid, sizeof(struct fwdt_io_data)))
+		return -EFAULT;
+
  err:
 	return ret;
 }
@@ -829,15 +836,19 @@ static int handle_hardware_memory_cmd(fwdt_generic __user *fg)
 {
 	int ret = 0;
 	u64 *mem;
-	struct fwdt_mem_data *fmd = (struct fwdt_mem_data*) fg;
+	struct fwdt_mem_data fmd;
 
-	mem = ioremap(fmd->mem_address, 8);
+	if (copy_from_user(&fmd, fg, sizeof(struct fwdt_mem_data)))
+		return -EFAULT;
+
+	mem = ioremap(fmd.mem_address, 8);
+
 	switch (fg->parameters.func) {
 	case GET_DATA_DWORD:
-		fmd->mem_data = *mem;
+		fmd.mem_data = *mem;
 		break;	
 	case SET_DATA_DWORD:
-		*mem = fmd->mem_data;
+		*mem = fmd.mem_data;
 		break;	
 	default:
 		ret = FWDT_FUNC_NOT_SUPPORTED;
@@ -845,7 +856,11 @@ static int handle_hardware_memory_cmd(fwdt_generic __user *fg)
 		break;
 	}
 
-	fmd->parameters.func_status = FWDT_SUCCESS;
+	fmd.parameters.func_status = FWDT_SUCCESS;
+
+	if (copy_to_user(fg, &fmd, sizeof(struct fwdt_mem_data)))
+		return -EFAULT;
+
  err:
 	iounmap(mem);
 	return ret;
@@ -854,11 +869,14 @@ static int handle_hardware_memory_cmd(fwdt_generic __user *fg)
 static int handle_hardware_cmos_cmd(fwdt_generic __user *fg) 
 {
 	int ret = 0;
-	struct fwdt_cmos_data *fcd = (struct fwdt_cmos_data*) fg;
+	struct fwdt_cmos_data fcd;
+
+	if (copy_from_user(&fcd, fg, sizeof(struct fwdt_cmos_data)))
+		return -EFAULT;
 
 	switch (fg->parameters.func) {
 	case GET_DATA_BYTE:
-		fcd->cmos_data = CMOS_READ(fcd->cmos_address);
+		fcd.cmos_data = CMOS_READ(fcd.cmos_address);
 		break;	
 	default:
 		ret = FWDT_FUNC_NOT_SUPPORTED;
@@ -866,7 +884,11 @@ static int handle_hardware_cmos_cmd(fwdt_generic __user *fg)
 		break;
 	}
 
-	fcd->parameters.func_status = FWDT_SUCCESS;
+	fcd.parameters.func_status = FWDT_SUCCESS;
+
+	if (copy_to_user(fg, &fcd, sizeof(struct fwdt_cmos_data)))
+		return -EFAULT;
+
  err:
 	return ret;
 }
