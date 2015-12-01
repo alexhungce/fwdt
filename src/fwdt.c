@@ -33,6 +33,7 @@
 #include <linux/miscdevice.h>
 #include <asm/time.h>
 #include <asm/msr.h>
+#include <linux/semaphore.h>
 
 #include "fwdt.h"
 
@@ -922,13 +923,18 @@ static long fwdt_runtime_ioctl(struct file *file, unsigned int cmd,
 	return err;
 }
 
+static struct semaphore fwdt_lock;
 static int fwdt_runtime_open(struct inode *inode, struct file *file)
 {
+	if (down_trylock(&fwdt_lock))
+		return -EBUSY;
+
 	return 0;
 }
 
 static int fwdt_runtime_close(struct inode *inode, struct file *file)
 {
+	up(&fwdt_lock);
 	return 0;
 }
 
@@ -1092,6 +1098,8 @@ static int __init fwdt_init(void)
 					MISC_DYNAMIC_MINOR);
 		goto err_driver_reg;
 	}
+
+	sema_init(&fwdt_lock, 1);
 
 	memset(&pci_dev, 0xFF, sizeof(pci_dev));
 
