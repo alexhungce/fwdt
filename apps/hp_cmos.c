@@ -21,6 +21,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <sys/ioctl.h>
+#include <unistd.h>
 #include <fcntl.h>
 
 #include "fwdtapp.h"

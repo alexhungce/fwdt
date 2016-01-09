@@ -21,13 +21,13 @@
 #include <stdio.h>
 #include <string.h>
 #include <sys/ioctl.h>
+#include <unistd.h>
 #include <fcntl.h>
 
 #include "fwdtapp.h"
 #include "fwdt.h"
 
-int get_ec_register(int fd, u8 addr, u8* val)
-{
+int get_ec_register(int fd, u8 addr, u8* val) {
 	int err;
 	long ioret;
 	struct fwdt_ec_data fec;
@@ -44,8 +44,7 @@ int get_ec_register(int fd, u8 addr, u8* val)
 	return 0;
 }
 
-int main(void)
-{
+int main(void) {
 	int err, i;
 	int fd;
 	u8 ec_reg;

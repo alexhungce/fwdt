@@ -772,7 +772,7 @@ static int handle_acpi_ec_cmd(fwdt_generic __user *fg)
 	int err;
 	struct fwdt_ec_data *fec = (struct fwdt_ec_data*) fg;
 	struct fwdt_ec_data ecd;
-
+pr_info("handle_acpi_ec_cmd\n");
 	if (copy_from_user(&ecd, fec, sizeof(struct fwdt_ec_data)))
 		return -EFAULT;
 
@@ -894,7 +894,7 @@ static long fwdt_runtime_ioctl(struct file *file, unsigned int cmd,
 							unsigned long arg)
 {
 	int err;
-
+pr_info("fwdt_runtime_ioctl\n");
 	switch (cmd) {
 	case FWDT_ACPI_VGA_CMD:
 		err = handle_acpi_vga_cmd((fwdt_generic __user *) arg);
