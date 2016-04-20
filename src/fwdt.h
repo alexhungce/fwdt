@@ -106,5 +106,5 @@ typedef struct {
         _IOWR('p', 0x04, struct fwdt_cmos_data)
 
 #define FWDT_ACPI_EC_CMD \
-        _IOWR('p', 0x05, struct fwdt_brightness)
+        _IOWR('p', 0x05, struct fwdt_ec_data)
 #endif
