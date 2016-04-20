@@ -772,7 +772,7 @@ static int handle_acpi_ec_cmd(fwdt_generic __user *fg)
 	int err;
 	struct fwdt_ec_data *fec = (struct fwdt_ec_data*) fg;
 	struct fwdt_ec_data ecd;
-pr_info("handle_acpi_ec_cmd\n");
+
 	if (copy_from_user(&ecd, fec, sizeof(struct fwdt_ec_data)))
 		return -EFAULT;
 
