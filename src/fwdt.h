@@ -88,6 +88,14 @@ struct fwdt_ec_data {
 	u8		data;
 } __attribute__ ((packed));
 
+struct fwdt_acpi_data {
+	fwdt_parameter	parameters;
+	char	acpi_path[256];
+	u32		para1;
+	u32		para2;
+	u32		retVal;
+} __attribute__ ((packed));
+
 typedef struct {
 	fwdt_parameter	parameters;
 } fwdt_generic;
@@ -107,4 +115,7 @@ typedef struct {
 
 #define FWDT_ACPI_EC_CMD \
         _IOWR('p', 0x05, struct fwdt_ec_data)
+
+#define FWDT_ACPI_AML_CMD \
+        _IOWR('p', 0x06, struct fwdt_acpi_data)
 #endif

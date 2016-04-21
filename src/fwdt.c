@@ -890,6 +890,33 @@ static int handle_hardware_cmos_cmd(fwdt_generic __user *fg)
 	return ret;
 }
 
+static int handle_acpi_aml_cmd(fwdt_generic __user *fg)
+{
+	int ret = 0;
+	struct fwdt_acpi_data fd;
+
+	if (copy_from_user(&fd, fg, sizeof(struct fwdt_acpi_data)))
+		return -EFAULT;
+
+	switch (fg->parameters.func) {
+	case GET_DATA_DWORD:
+		// TODO evaluate acpi object
+		break;
+	default:
+		ret = FWDT_FUNC_NOT_SUPPORTED;
+		goto err;
+		break;
+	}
+
+	fd.parameters.func_status = FWDT_SUCCESS;
+
+	if (copy_to_user(fg, &fd, sizeof(struct fwdt_acpi_data)))
+		return -EFAULT;
+
+ err:
+	return ret;
+}
+
 static long fwdt_runtime_ioctl(struct file *file, unsigned int cmd,
 							unsigned long arg)
 {
@@ -910,6 +937,9 @@ static long fwdt_runtime_ioctl(struct file *file, unsigned int cmd,
 		break;
 	case FWDT_ACPI_EC_CMD:
 		err = handle_acpi_ec_cmd((fwdt_generic __user *) arg);
+		break;
+	case FWDT_ACPI_AML_CMD:
+		err = handle_acpi_aml_cmd((fwdt_generic __user *) arg);
 		break;
 	default:
 		err = FWDT_FUNC_NOT_SUPPORTED;

@@ -86,6 +86,8 @@ def getIoNum(cmd):
         return _IOWR(ord('p'), 4, 6)
     if cmd == 'ec':
         return _IOWR(ord('p'), 5, 6)
+    if cmd == 'acpi':
+        return _IOWR(ord('p'), 6, 272)
     return -1
 
 def cmosRead(addr):
