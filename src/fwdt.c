@@ -62,7 +62,7 @@ static acpi_status acpi_handle_locate_callback(acpi_handle handle,
 static void acpi_device_path(const char *buf, char *path)
 {
 	path[0] = '\\';
-	strncpy(path + 1, buf, strlen(buf));	
+	strncpy(path + 1, buf, strlen(buf));
 	path[strlen(buf)] = 0;
 }
 
@@ -255,9 +255,9 @@ static ssize_t acpi_video_write_device(struct device *dev,
 {
 	acpi_status status;
 	char device_path[255];
-	
+
 	device_path[0] = '\\';
-	strncpy(device_path + 1, buf, strlen(buf));	
+	strncpy(device_path + 1, buf, strlen(buf));
 	device_path[strlen(buf)] = 0;
 
 	status = acpi_get_handle(NULL, device_path, &video_device);
@@ -341,7 +341,7 @@ static ssize_t mem_write_address(struct device *dev,
 	struct device_attribute *attr, const char *buf, size_t count)
 {
 	mem_addr = simple_strtoul(buf, NULL, 16);
-	
+
 	return count;
 }
 
@@ -368,7 +368,7 @@ static ssize_t mem_write_data(struct device *dev, struct device_attribute *attr,
 	u32 data;
 
 	data = simple_strtoul(buf, NULL, 16) & 0xFFFFFFFF;
-	
+
 	mem = ioremap(mem_addr, 8);
 	*mem = data;
 	iounmap(mem);
@@ -389,7 +389,7 @@ static ssize_t iow_write_address(struct device *dev,
 	struct device_attribute *attr, const char *buf, size_t count)
 {
 	iow_addr = simple_strtoul(buf, NULL, 16) & 0xFFFF;
-	
+
 	return count;
 }
 
@@ -409,7 +409,7 @@ static ssize_t iow_write_data(struct device *dev, struct device_attribute *attr,
 
 	data = simple_strtoul(buf, NULL, 16);
 	outw(data, iow_addr);
-	
+
 	return count;
 }
 
@@ -426,7 +426,7 @@ static ssize_t iob_write_address(struct device *dev,
 	struct device_attribute *attr, const char *buf, size_t count)
 {
 	iob_addr = simple_strtoul(buf, NULL, 16) & 0xFFFF;
-	
+
 	return count;
 }
 
@@ -446,7 +446,7 @@ static ssize_t iob_write_data(struct device *dev, struct device_attribute *attr,
 
 	data = simple_strtoul(buf, NULL, 16);
 	outb(data, iob_addr);
-	
+
 	return count;
 }
 
@@ -467,7 +467,7 @@ static ssize_t pci_read_config_data(struct device *dev,
 	pdev = pci_get_subsys(pci_dev.vid, pci_dev.did,
 				PCI_ANY_ID, PCI_ANY_ID, NULL);
 	if (pdev == NULL) {
-		pr_info("pci device [%04x:%04x] is not found\n", 
+		pr_info("pci device [%04x:%04x] is not found\n",
 			pci_dev.vid, pci_dev.did);
 		return -EINVAL;
 	}
@@ -488,8 +488,8 @@ static ssize_t pci_write_config_data(struct device *dev,
 				PCI_ANY_ID, PCI_ANY_ID, NULL);
 	if (pdev)
 		pci_write_config_dword(pdev, pci_dev.offset, data);
-	else 
-		pr_info("pci device [%04x:%04x] is not found\n", 
+	else
+		pr_info("pci device [%04x:%04x] is not found\n",
 			pci_dev.vid, pci_dev.did);
 
 	return count;
@@ -741,23 +741,23 @@ static int get_acpi_vga_br_levels(struct fwdt_brightness *fbl)
 	return status;
 }
 
-static int handle_acpi_vga_cmd(fwdt_generic __user *fg) 
+static int handle_acpi_vga_cmd(fwdt_generic __user *fg)
 {
 	int err;
 
 	switch (fg->parameters.func) {
 	case GET_BRIGHTNESS:
 		err = get_acpi_vga_brightness((struct fwdt_brightness*) fg);
-		break;	
+		break;
 	case SET_BRIGHTNESS:
 		err = set_acpi_vga_brightness((struct fwdt_brightness*) fg);
-		break;	
+		break;
 	case GET_BRIGHTNESS_LV:
 		err = get_acpi_vga_br_levels((struct fwdt_brightness*) fg);
-		break;	
+		break;
 /*
 	case GET_VIDEO_DEVICE:
-		break;	
+		break;
 */
 	default:
 		err = FWDT_FUNC_NOT_SUPPORTED;
@@ -793,7 +793,7 @@ static int handle_acpi_ec_cmd(fwdt_generic __user *fg)
 	return err;
 }
 
-static int handle_hardware_io_cmd(fwdt_generic __user *fg) 
+static int handle_hardware_io_cmd(fwdt_generic __user *fg)
 {
 	int ret = 0;
 	struct fwdt_io_data fid;
@@ -807,13 +807,13 @@ static int handle_hardware_io_cmd(fwdt_generic __user *fg)
 		break;
 	case GET_DATA_WORD:
 		fid.io_word = inw(fid.io_address);
-		break;	
+		break;
 	case SET_DATA_BYTE:
 		outb(fid.io_byte, fid.io_address);
 		break;
 	case SET_DATA_WORD:
 		outw(fid.io_word, fid.io_address);
-		break;	
+		break;
 	default:
 		ret = FWDT_FUNC_NOT_SUPPORTED;
 		goto err;
@@ -829,7 +829,7 @@ static int handle_hardware_io_cmd(fwdt_generic __user *fg)
 	return ret;
 }
 
-static int handle_hardware_memory_cmd(fwdt_generic __user *fg) 
+static int handle_hardware_memory_cmd(fwdt_generic __user *fg)
 {
 	int ret = 0;
 	u64 *mem;
@@ -843,10 +843,10 @@ static int handle_hardware_memory_cmd(fwdt_generic __user *fg)
 	switch (fg->parameters.func) {
 	case GET_DATA_DWORD:
 		fmd.mem_data = *mem;
-		break;	
+		break;
 	case SET_DATA_DWORD:
 		*mem = fmd.mem_data;
-		break;	
+		break;
 	default:
 		ret = FWDT_FUNC_NOT_SUPPORTED;
 		goto err;
@@ -863,7 +863,7 @@ static int handle_hardware_memory_cmd(fwdt_generic __user *fg)
 	return ret;
 }
 
-static int handle_hardware_cmos_cmd(fwdt_generic __user *fg) 
+static int handle_hardware_cmos_cmd(fwdt_generic __user *fg)
 {
 	int ret = 0;
 	struct fwdt_cmos_data fcd;
@@ -874,7 +874,7 @@ static int handle_hardware_cmos_cmd(fwdt_generic __user *fg)
 	switch (fg->parameters.func) {
 	case GET_DATA_BYTE:
 		fcd.cmos_data = CMOS_READ(fcd.cmos_address);
-		break;	
+		break;
 	default:
 		ret = FWDT_FUNC_NOT_SUPPORTED;
 		goto err;
@@ -894,20 +894,20 @@ static long fwdt_runtime_ioctl(struct file *file, unsigned int cmd,
 							unsigned long arg)
 {
 	int err;
-pr_info("fwdt_runtime_ioctl\n");
+
 	switch (cmd) {
 	case FWDT_ACPI_VGA_CMD:
 		err = handle_acpi_vga_cmd((fwdt_generic __user *) arg);
-		break;	
+		break;
 	case FWDT_HW_ACCESS_IO_CMD:
 		err = handle_hardware_io_cmd((fwdt_generic __user *) arg);
 		break;
 	case FWDT_HW_ACCESS_MEMORY_CMD:
 		err = handle_hardware_memory_cmd((fwdt_generic __user *) arg);
-		break;	
+		break;
 	case FWDT_HW_ACCESS_CMOS_CMD:
 		err = handle_hardware_cmos_cmd((fwdt_generic __user *) arg);
-		break;	
+		break;
 	case FWDT_ACPI_EC_CMD:
 		err = handle_acpi_ec_cmd((fwdt_generic __user *) arg);
 		break;
@@ -1116,7 +1116,7 @@ static void __exit fwdt_exit(void)
 	if (fwdt_platform_dev) {
 		platform_device_unregister(fwdt_platform_dev);
 		platform_driver_unregister(&fwdt_driver);
-	} 
+	}
 
 	misc_deregister(&fwdt_runtime_dev);
 }
