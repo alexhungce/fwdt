@@ -15,7 +15,6 @@ import os
 import sys
 import fcntl
 import array
-import ioctl
 
 from struct import *
 
