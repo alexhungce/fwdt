@@ -57,20 +57,35 @@ def _IOW(type, nr, size): return _IOC(_IOC_WRITE, type, nr, size)
 def _IOWR(type, nr, size): return _IOC(_IOC_READ | _IOC_WRITE, type, nr, size)
 # end of Linux ioctl numbers in Python
 
-funcSelection = ["Help", "ACPI", "PCI", "CMOS"]
+funcSelection = ["Help", "VGA", "I/O", "MEMORY", "CMOS", "EC", "ACPI"]
+funcs = {"help": 0, "vga": 1, "io": 2, "memory": 3, "cmos": 4, "ec": 5, "acpi": 6}
 fwdtSysFile = "/dev/fwdt"
 
-def menuPrintSelect():
-    os.system('clear')
+def userSelectMenu(argv):
 
-    for index, selection in enumerate(funcSelection):
-        print(index, selection)
+    if len(argv) == 1:
+        os.system('clear')
+        for index, selection in enumerate(funcSelection):
+            print(index, selection)
 
-    try:
-        userSelect = int(input("Selection Function: "))
-    except:
-        print("Error: You did not enter a number")
-        exit()
+        try:
+            userSelect = int(input("Selection Function: "))
+            if userSelect > len(funcSelection) - 1:
+                userSelect = -1
+        except:
+            userSelect = -1
+        if userSelect == -1:
+            print("Error: Invalid input: ", userSelect)
+
+    elif len(argv) == 2:
+        try:
+            userSelect = funcs[argv[1]]
+        except KeyError:
+            userSelect = -1
+            print("Error: Unsupport function: ", argv[1])
+    else:
+        print("Error: Invalid arguments")
+        userSelect = -1
 
     return userSelect
 
@@ -97,8 +112,11 @@ def cmosRead(addr):
     return buf[5]
 
 def main():
-    userSelect = menuPrintSelect()
+
     os.system('clear')
+    userSelect = userSelectMenu(sys.argv)
+    if userSelect == -1:
+        exit()
 
     try:
         print("==", funcSelection[userSelect], "==")
@@ -106,7 +124,7 @@ def main():
         print("Selection is out of range!")
         exit()
 
-    print(cmosRead(0))
+#    print(cmosRead(0)) # this is an example
 
 if __name__ == "__main__":
     main()
