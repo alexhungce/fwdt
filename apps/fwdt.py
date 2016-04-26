@@ -111,6 +111,21 @@ def cmosRead(addr):
     file.close
     return buf[5]
 
+def ioReadByte(addr):
+    file = open(fwdtSysFile)
+    buf = array.array('B', pack('HHHB', 1, 0, addr, 0))
+    fcntl.ioctl(file, getIoNum('io'), buf, 1)
+    file.close
+    return buf[6]
+
+def ioReadWord(addr):
+    file = open(fwdtSysFile)
+    buf = array.array('B', pack('HHHH', 3, 0, addr, 0))
+    fcntl.ioctl(file, getIoNum('io'), buf, 1)
+    file.close
+    return buf[6] + (buf[7] << 8)
+
+
 def main():
 
     os.system('clear')
@@ -125,6 +140,7 @@ def main():
         exit()
 
 #    print(cmosRead(0)) # this is an example
+#    print(hex(ioReadWord(0x1830))) # this is an io read example
 
 if __name__ == "__main__":
     main()
