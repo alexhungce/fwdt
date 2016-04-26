@@ -125,7 +125,6 @@ def ioReadWord(addr):
     file.close
     return buf[6] + (buf[7] << 8)
 
-
 def main():
 
     os.system('clear')
@@ -139,7 +138,7 @@ def main():
         print("Selection is out of range!")
         exit()
 
-#    print(cmosRead(0)) # this is an example
+#    print(cmosRead(0)) # this is a cmos read example
 #    print(hex(ioReadWord(0x1830))) # this is an io read example
 
 if __name__ == "__main__":
