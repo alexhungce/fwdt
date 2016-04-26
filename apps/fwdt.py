@@ -106,7 +106,7 @@ def getIoNum(cmd):
 
 def cmosRead(addr):
     file = open(fwdtSysFile)
-    buf = array.array('b', pack('HHBB', 1, 0, addr, 0))
+    buf = array.array('B', pack('HHBB', 1, 0, addr, 0))
     fcntl.ioctl(file, getIoNum('cmos'), buf, 1)
     file.close
     return buf[5]
