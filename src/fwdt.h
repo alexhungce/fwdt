@@ -18,20 +18,20 @@
 #define __FWDT_H__
 
 enum fwdt_acpi_vga_sub_cmd {
-	GET_BRIGHTNESS		= 	0x01,
+	GET_BRIGHTNESS		=	0x01,
 	SET_BRIGHTNESS		=	0x02,
 	GET_BRIGHTNESS_LV	=	0x03,
 	GET_VIDEO_DEVICE	=	0x04,
 };
 
 enum fwdt_acpi_ec_sub_cmd {
-	GET_EC_REGISTER		= 	0x01,
+	GET_EC_REGISTER		=	0x01,
 	SET_EC_REGISTER		=	0x02,
 	CALL_EC_QMETHOD		=	0x03,
 };
 
 enum fwdt_hw_access_sub_cmd {
-	GET_DATA_BYTE		= 	0x01,
+	GET_DATA_BYTE		=	0x01,
 	SET_DATA_BYTE		=	0x02,
 	GET_DATA_WORD		=	0x03,
 	SET_DATA_WORD		=	0x04,
