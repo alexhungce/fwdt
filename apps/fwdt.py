@@ -125,6 +125,13 @@ def ioReadWord(addr):
     file.close
     return buf[6] + (buf[7] << 8)
 
+def ecRead(addr):
+    file = open(fwdtSysFile)
+    buf = array.array('B', pack('HHBB', 1, 0, addr, 0))
+    fcntl.ioctl(file, getIoNum('ec'), buf, 1)
+    file.close
+    return buf[5]
+
 def main():
 
     os.system('clear')
