@@ -28,6 +28,7 @@ enum fwdt_acpi_ec_sub_cmd {
 	GET_EC_REGISTER		=	0x01,
 	SET_EC_REGISTER		=	0x02,
 	CALL_EC_QMETHOD		=	0x03,
+	CHECK_EC_DEVICE		=	0x04,
 };
 
 enum fwdt_hw_access_sub_cmd {

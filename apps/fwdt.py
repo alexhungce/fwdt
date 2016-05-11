@@ -125,6 +125,16 @@ def ioReadWord(addr):
     file.close
     return buf[6] + (buf[7] << 8)
 
+def ecCheck():
+    present = False
+    file = open(fwdtSysFile)
+    buf = array.array('B', pack('HHBB', 4, 0, 0, 0))
+    fcntl.ioctl(file, getIoNum('ec'), buf, 1)
+    file.close
+    if buf[0] + (buf[1] << 8) == 0:
+        present = True
+    return present
+
 def ecRead(addr):
     file = open(fwdtSysFile)
     buf = array.array('B', pack('HHBB', 1, 0, addr, 0))
