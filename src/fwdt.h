@@ -27,6 +27,7 @@ enum fwdt_acpi_vga_sub_cmd {
 enum fwdt_acpi_ec_sub_cmd {
 	GET_EC_REGISTER		= 	0x01,
 	SET_EC_REGISTER		=	0x02,
+	CALL_EC_QMETHOD		=	0x03,
 };
 
 enum fwdt_hw_access_sub_cmd {
@@ -84,7 +85,10 @@ struct fwdt_cmos_data {
 
 struct fwdt_ec_data {
 	fwdt_parameter	parameters;
-	u8		address;
+	union {
+		u8		address;
+		u8		q_method;
+	};
 	u8		data;
 } __attribute__ ((packed));
 

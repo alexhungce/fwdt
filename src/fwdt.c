@@ -772,6 +772,8 @@ static int handle_acpi_ec_cmd(fwdt_generic __user *fg)
 	int err;
 	struct fwdt_ec_data *fec = (struct fwdt_ec_data*) fg;
 	struct fwdt_ec_data ecd;
+	char q_num[5];
+	acpi_status status;
 
 	if (copy_from_user(&ecd, fec, sizeof(struct fwdt_ec_data)))
 		return -EFAULT;
@@ -784,6 +786,14 @@ static int handle_acpi_ec_cmd(fwdt_generic __user *fg)
 		break;
 	case SET_EC_REGISTER:
 		err = ec_write(ecd.address, ecd.data);
+		break;
+	case CALL_EC_QMETHOD:
+		sprintf(q_num, "_Q%02X", ecd.q_method);
+		status = acpi_evaluate_object(ec_device, q_num, NULL, NULL);
+		if (ACPI_SUCCESS(status))
+			err = FWDT_SUCCESS;
+		else
+			err = FWDT_DEVICE_NOT_FOUND;
 		break;
 	default:
 		err = FWDT_FUNC_NOT_SUPPORTED;
