@@ -708,6 +708,46 @@ static int set_acpi_vga_brightness(struct fwdt_brightness *fb)
 	return status;
 }
 
+static int fwdt_find_vga(void)
+{
+    struct pci_dev *pdev = NULL;
+    acpi_handle handle = NULL;
+
+    while ((pdev = pci_get_device(PCI_ANY_ID, PCI_ANY_ID, pdev)) != NULL) {
+        acpi_handle _handle;
+        struct acpi_buffer buf = { ACPI_ALLOCATE_BUFFER, NULL};
+        int pci_class = pdev->class >> 8;
+
+        if (pci_class != PCI_CLASS_DISPLAY_VGA &&
+            pci_class != PCI_CLASS_DISPLAY_3D &&
+            pci_class != PCI_CLASS_DISPLAY_OTHER){
+            continue;
+        }
+
+        _handle = DEVICE_ACPI_HANDLE(&pdev->dev);
+
+        if (!_handle) {
+            pr_warn("can not find ACPI handle for VGA device %s\n",
+                dev_name(&pdev->dev));
+            continue;
+        }
+
+        acpi_get_name(_handle, ACPI_FULL_PATHNAME, &buf);
+        if (pdev->vendor == PCI_VENDOR_ID_INTEL) {
+            handle = _handle;
+            pr_info("Found intergrated Intel VGA device %s: %s\n",
+                dev_name(&pdev->dev), (char *)buf.pointer);
+        } else {
+            handle = _handle;
+            pr_info("Found discrete VGA device %s: %s\n",
+                dev_name(&pdev->dev), (char *)buf.pointer);
+        }
+
+        kfree(buf.pointer);
+    }
+    return 0;
+}
+
 static int get_acpi_vga_br_levels(struct fwdt_brightness *fbl)
 {
 	int status;
@@ -1150,6 +1190,8 @@ static int __init fwdt_init(void)
 	sema_init(&fwdt_lock, 1);
 
 	memset(&pci_dev, 0xFF, sizeof(pci_dev));
+
+    fwdt_find_vga();
 
 	return 0;
 
