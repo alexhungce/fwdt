@@ -21,7 +21,6 @@
 #include <linux/init.h>
 #include <linux/platform_device.h>
 #include <linux/acpi.h>
-#include <linux/pci.h>
 #include <acpi/acpi_bus.h>
 #include <acpi/video.h>
 #include <linux/proc_fs.h>
@@ -451,97 +450,11 @@ static ssize_t iob_write_data(struct device *dev, struct device_attribute *attr,
 
 static DEVICE_ATTR(iob_data, S_IRUGO | S_IWUSR, iob_read_data, iob_write_data);
 
-static struct {
-	u16 vid;
-	u16 did;
-	u8 offset;
-} pci_dev;
-
-static ssize_t pci_read_config_data(struct device *dev,
-	struct device_attribute *attr, char *buf)
-{
-	struct pci_dev *pdev = NULL;
-	int data;
-
-	pdev = pci_get_subsys(pci_dev.vid, pci_dev.did,
-				PCI_ANY_ID, PCI_ANY_ID, NULL);
-	if (pdev == NULL) {
-		pr_info("pci device [%04x:%04x] is not found\n",
-			pci_dev.vid, pci_dev.did);
-		return -EINVAL;
-	}
-
-	pci_read_config_dword(pdev, pci_dev.offset, &data);
-
-	return sprintf(buf, "0x%08x\n", data);;
-}
-
-static ssize_t pci_write_config_data(struct device *dev,
-	struct device_attribute *attr, const char *buf, size_t count)
-{
-	struct pci_dev *pdev = NULL;
-	int data;
-
-	data = simple_strtoul(buf, NULL, 16) & 0xFFFFFFFF;
-	pdev = pci_get_subsys(pci_dev.vid, pci_dev.did,
-				PCI_ANY_ID, PCI_ANY_ID, NULL);
-	if (pdev)
-		pci_write_config_dword(pdev, pci_dev.offset, data);
-	else
-		pr_info("pci device [%04x:%04x] is not found\n",
-			pci_dev.vid, pci_dev.did);
-
-	return count;
-}
-
-static DEVICE_ATTR(pci_data, S_IRUGO | S_IWUSR,
-		pci_read_config_data, pci_write_config_data);
-
-static ssize_t pci_read_config_offset(struct device *dev,
-	struct device_attribute *attr, char *buf)
-{
-	return sprintf(buf, "%x\n", pci_dev.offset);
-}
-
-static ssize_t pci_write_config_offset(struct device *dev,
-	struct device_attribute *attr, const char *buf, size_t count)
-{
-	pci_dev.offset = simple_strtoul(buf, NULL, 16) & 0xFF;
-	return count;
-}
-
-static DEVICE_ATTR(pci_reg, S_IRUGO | S_IWUSR,
-		pci_read_config_offset, pci_write_config_offset);
-
-static ssize_t pci_read_hardware_ids(struct device *dev,
-	struct device_attribute *attr, char *buf)
-{
-	if (pci_dev.vid == 0xFFFF || pci_dev.did == 0xFFFF)
-		strcpy(buf,"ex. 8086:1c2d\n");
-	else
-		sprintf(buf, "%04x:%04x\n", pci_dev.vid, pci_dev.did);
-
-	return strlen(buf);
-}
-
-static ssize_t pci_write_hardware_ids(struct device *dev,
-	struct device_attribute *attr, const char *buf, size_t count)
-{
-	unsigned int vendor_id, device_id;
-
-	if (strlen(buf) > 10)
-		return 0;
-
-	sscanf(buf, "%4x:%4x\n", &vendor_id, &device_id);
-
-	pci_dev.did = device_id;
-	pci_dev.vid = vendor_id;
-
-	return count;
-}
-
-static DEVICE_ATTR(pci_id, S_IRUGO | S_IWUSR,
-	pci_read_hardware_ids, pci_write_hardware_ids);
+/* PCI */
+extern Pci_dev pci_dev;
+static DEVICE_ATTR(pci_data, S_IRUGO | S_IWUSR, pci_read_data, pci_write_data);
+static DEVICE_ATTR(pci_reg, S_IRUGO | S_IWUSR, pci_read_offset, pci_write_offset);
+static DEVICE_ATTR(pci_id, S_IRUGO | S_IWUSR, pci_read_ids, pci_write_ids);
 
 /* ACPI EC */
 extern acpi_handle ec_device;
