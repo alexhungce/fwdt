@@ -613,23 +613,7 @@ static ssize_t acpi_write_ec_qxx(struct device *dev,
 
 static DEVICE_ATTR(ec_qmethod, S_IWUSR, NULL, acpi_write_ec_qxx);
 
-static int cmos_offset;
-static ssize_t cmos_read_data(struct device *dev,
-	struct device_attribute *attr, char *buf)
-{
-	if (cmos_offset > 0xFF)
-		return -EINVAL;
 
-	return sprintf(buf, "0x%02x\n", CMOS_READ(cmos_offset));
-}
-
-static ssize_t cmos_write_addr(struct device *dev,
-	struct device_attribute *attr, const char *buf, size_t count)
-{
-	if (kstrtoint(buf, 16, &cmos_offset))
-		return -EINVAL;
-	return count;
-}
 
 static DEVICE_ATTR(cmos, S_IRUGO | S_IWUSR, cmos_read_data, cmos_write_addr);
 
@@ -885,32 +869,6 @@ static int handle_hardware_memory_cmd(fwdt_generic __user *fg)
 	return ret;
 }
 
-static int handle_hardware_cmos_cmd(fwdt_generic __user *fg)
-{
-	int ret = 0;
-	struct fwdt_cmos_data fcd;
-
-	if (copy_from_user(&fcd, fg, sizeof(struct fwdt_cmos_data)))
-		return -EFAULT;
-
-	switch (fg->parameters.func) {
-	case GET_DATA_BYTE:
-		fcd.cmos_data = CMOS_READ(fcd.cmos_address);
-		break;
-	default:
-		ret = FWDT_FUNC_NOT_SUPPORTED;
-		goto err;
-		break;
-	}
-
-	fcd.parameters.func_status = FWDT_SUCCESS;
-
-	if (copy_to_user(fg, &fcd, sizeof(struct fwdt_cmos_data)))
-		return -EFAULT;
-
- err:
-	return ret;
-}
 
 static int handle_acpi_aml_cmd(fwdt_generic __user *fg)
 {
