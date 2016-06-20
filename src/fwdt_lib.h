@@ -19,6 +19,13 @@
 
 #include "fwdt.h"
 
+/* Memory functions */
+ssize_t mem_read_address(struct device *dev, struct device_attribute *attr, char *buf);
+ssize_t mem_write_address(struct device *dev, struct device_attribute *attr, const char *buf, size_t count);
+ssize_t mem_read_data(struct device *dev, struct device_attribute *attr, char *buf);
+ssize_t mem_write_data(struct device *dev, struct device_attribute *attr, const char *buf, size_t count);
+int handle_hardware_memory_cmd(fwdt_generic __user *fg);
+
 /* I/O functions */
 ssize_t iow_read_address(struct device *dev, struct device_attribute *attr, char *buf);
 ssize_t iow_write_address(struct device *dev, struct device_attribute *attr, const char *buf, size_t count);

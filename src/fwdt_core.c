@@ -328,52 +328,8 @@ static ssize_t acpi_video_write_brightness(struct device *dev,
 static DEVICE_ATTR(video_brightness, S_IRUGO | S_IWUSR,
 	acpi_video_read_brightness, acpi_video_write_brightness);
 
-static u32 mem_addr;
-static ssize_t mem_read_address(struct device *dev,
-	struct device_attribute *attr, char *buf)
-{
-	return sprintf(buf, "0x%08x\n", mem_addr);
-}
-
-static ssize_t mem_write_address(struct device *dev,
-	struct device_attribute *attr, const char *buf, size_t count)
-{
-	mem_addr = simple_strtoul(buf, NULL, 16);
-
-	return count;
-}
-
-static DEVICE_ATTR(mem_address, S_IRUGO | S_IWUSR,
-		mem_read_address, mem_write_address);
-
-static ssize_t mem_read_data(struct device *dev, struct device_attribute *attr,
-			char *buf)
-{
-	u32 *mem;
-	u32 data;
-
-	mem = ioremap(mem_addr, 8);
-	data = *mem;
-	iounmap(mem);
-
-	return sprintf(buf, "0x%08x\n", data);
-}
-
-static ssize_t mem_write_data(struct device *dev, struct device_attribute *attr,
-			const char *buf, size_t count)
-{
-	u32 *mem;
-	u32 data;
-
-	data = simple_strtoul(buf, NULL, 16) & 0xFFFFFFFF;
-
-	mem = ioremap(mem_addr, 8);
-	*mem = data;
-	iounmap(mem);
-
-	return count;
-}
-
+/* Memory */
+static DEVICE_ATTR(mem_address, S_IRUGO | S_IWUSR, mem_read_address, mem_write_address);
 static DEVICE_ATTR(mem_data, S_IRUGO | S_IWUSR, mem_read_data, mem_write_data);
 
 /* I/O */
@@ -530,41 +486,6 @@ static int handle_acpi_vga_cmd(fwdt_generic __user *fg)
 
 	return err;
 }
-
-static int handle_hardware_memory_cmd(fwdt_generic __user *fg)
-{
-	int ret = 0;
-	u64 *mem;
-	struct fwdt_mem_data fmd;
-
-	if (copy_from_user(&fmd, fg, sizeof(struct fwdt_mem_data)))
-		return -EFAULT;
-
-	mem = ioremap(fmd.mem_address, 8);
-
-	switch (fg->parameters.func) {
-	case GET_DATA_DWORD:
-		fmd.mem_data = *mem;
-		break;
-	case SET_DATA_DWORD:
-		*mem = fmd.mem_data;
-		break;
-	default:
-		ret = FWDT_FUNC_NOT_SUPPORTED;
-		goto err;
-		break;
-	}
-
-	fmd.parameters.func_status = FWDT_SUCCESS;
-
-	if (copy_to_user(fg, &fmd, sizeof(struct fwdt_mem_data)))
-		return -EFAULT;
-
- err:
-	iounmap(mem);
-	return ret;
-}
-
 
 static int handle_acpi_aml_cmd(fwdt_generic __user *fg)
 {
