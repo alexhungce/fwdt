@@ -64,4 +64,8 @@ ssize_t cmos_read_data(struct device *dev, struct device_attribute *attr, char *
 ssize_t cmos_write_addr(struct device *dev, struct device_attribute *attr, const char *buf, size_t count);
 int handle_hardware_cmos_cmd(fwdt_generic __user *fg);
 
+/* MSR functions */
+ssize_t msr_read_data(struct device *dev, struct device_attribute *attr, char *buf);
+ssize_t msr_set_register(struct device *dev, struct device_attribute *attr, const char *buf, size_t count);
+
 #endif

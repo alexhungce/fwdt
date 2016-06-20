@@ -26,7 +26,6 @@
 #include <linux/proc_fs.h>
 #include <linux/miscdevice.h>
 #include <linux/uaccess.h>
-#include <asm/msr.h>
 #include <linux/semaphore.h>
 
 #include "fwdt_lib.h"
@@ -353,24 +352,7 @@ static DEVICE_ATTR(ec_qmethod, S_IWUSR, NULL, ec_exec_qmethod);
 /* CMOS */
 static DEVICE_ATTR(cmos, S_IRUGO | S_IWUSR, cmos_read_data, cmos_write_addr);
 
-static int msr_register;
-static ssize_t msr_read_data(struct device *dev,
-	struct device_attribute *attr, char *buf)
-{
-	u32 h, l;
-	rdmsr(msr_register, l, h);
-
-	return sprintf(buf, "0x%08x%08x\n", (h << 16), l);
-}
-
-static ssize_t msr_set_register(struct device *dev,
-	struct device_attribute *attr, const char *buf, size_t count)
-{
-	if (kstrtoint(buf, 16, &msr_register))
-		return -EINVAL;
-	return count;
-}
-
+/* MSR */
 static DEVICE_ATTR(msr, S_IRUGO | S_IWUSR, msr_read_data, msr_set_register);
 
 static int get_acpi_vga_brightness(struct fwdt_brightness *fb)
