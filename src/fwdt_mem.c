@@ -92,7 +92,7 @@ int handle_hardware_memory_cmd(fwdt_generic __user *fg)
 	fmd.parameters.func_status = FWDT_SUCCESS;
 
 	if (copy_to_user(fg, &fmd, sizeof(struct fwdt_mem_data)))
-		return -EFAULT;
+		ret = -EFAULT;
 
  err:
 	iounmap(mem);
