@@ -17,9 +17,7 @@
 #define pr_fmt(fmt) "fwdt: " fmt
 
 #include <linux/module.h>
-#include <linux/init.h>
 #include <linux/acpi.h>
-#include <acpi/acpi_drivers.h>
 #include <linux/semaphore.h>
 #include <linux/uaccess.h>
 #include "fwdt_lib.h"

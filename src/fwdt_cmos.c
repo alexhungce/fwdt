@@ -17,7 +17,6 @@
 #define pr_fmt(fmt) "fwdt: " fmt
 
 #include <linux/module.h>
-#include <linux/init.h>
 #include <asm/time.h>
 #include <linux/semaphore.h>
 #include "fwdt_lib.h"

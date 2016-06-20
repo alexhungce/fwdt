@@ -21,13 +21,12 @@
 #include <linux/init.h>
 #include <linux/platform_device.h>
 #include <linux/acpi.h>
-#include <acpi/acpi_drivers.h>
 #include <linux/pci.h>
 #include <acpi/acpi_bus.h>
 #include <acpi/video.h>
 #include <linux/proc_fs.h>
 #include <linux/miscdevice.h>
-#include <asm/time.h>
+#include <linux/uaccess.h>
 #include <asm/msr.h>
 #include <linux/semaphore.h>
 

@@ -17,9 +17,6 @@
 #ifndef __FWDT_LIB_H__
 #define __FWDT_LIB_H__
 
-#include <linux/kernel.h>
-#include <linux/init.h>
-#include <linux/platform_device.h>
 #include "fwdt.h"
 
 /* CMOS functions */
