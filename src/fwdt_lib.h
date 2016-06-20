@@ -19,6 +19,17 @@
 
 #include "fwdt.h"
 
+/* I/O functions */
+ssize_t iow_read_address(struct device *dev, struct device_attribute *attr, char *buf);
+ssize_t iow_write_address(struct device *dev, struct device_attribute *attr, const char *buf, size_t count);
+ssize_t iow_read_data(struct device *dev, struct device_attribute *attr, char *buf);
+ssize_t iow_write_data(struct device *dev, struct device_attribute *attr, const char *buf, size_t count);
+ssize_t iob_read_address(struct device *dev, struct device_attribute *attr, char *buf);
+ssize_t iob_write_address(struct device *dev, struct device_attribute *attr, const char *buf, size_t count);
+ssize_t iob_read_data(struct device *dev, struct device_attribute *attr, char *buf);
+ssize_t iob_write_data(struct device *dev, struct device_attribute *attr, const char *buf, size_t count);
+int handle_hardware_io_cmd(fwdt_generic __user *fg);
+
 /* PCI functions */
 typedef struct {
 	u16 vid;

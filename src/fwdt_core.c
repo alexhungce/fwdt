@@ -376,78 +376,10 @@ static ssize_t mem_write_data(struct device *dev, struct device_attribute *attr,
 
 static DEVICE_ATTR(mem_data, S_IRUGO | S_IWUSR, mem_read_data, mem_write_data);
 
-static u16 iow_addr;
-static ssize_t iow_read_address(struct device *dev,
-	struct device_attribute *attr, char *buf)
-{
-	return sprintf(buf, "0x%04x\n", iow_addr);
-}
-
-static ssize_t iow_write_address(struct device *dev,
-	struct device_attribute *attr, const char *buf, size_t count)
-{
-	iow_addr = simple_strtoul(buf, NULL, 16) & 0xFFFF;
-
-	return count;
-}
-
-static DEVICE_ATTR(iow_address, S_IRUGO | S_IWUSR,
-		iow_read_address, iow_write_address);
-
-static ssize_t iow_read_data(struct device *dev, struct device_attribute *attr,
-			char *buf)
-{
-	return sprintf(buf, "0x%04x\n", inw(iow_addr));
-}
-
-static ssize_t iow_write_data(struct device *dev, struct device_attribute *attr,
-			const char *buf, size_t count)
-{
-	u16 data;
-
-	data = simple_strtoul(buf, NULL, 16);
-	outw(data, iow_addr);
-
-	return count;
-}
-
+/* I/O */
+static DEVICE_ATTR(iow_address, S_IRUGO | S_IWUSR, iow_read_address, iow_write_address);
 static DEVICE_ATTR(iow_data, S_IRUGO | S_IWUSR, iow_read_data, iow_write_data);
-
-static u16 iob_addr;
-static ssize_t iob_read_address(struct device *dev,
-	struct device_attribute *attr, char *buf)
-{
-	return sprintf(buf, "0x%04x\n", iob_addr);
-}
-
-static ssize_t iob_write_address(struct device *dev,
-	struct device_attribute *attr, const char *buf, size_t count)
-{
-	iob_addr = simple_strtoul(buf, NULL, 16) & 0xFFFF;
-
-	return count;
-}
-
-static DEVICE_ATTR(iob_address, S_IRUGO | S_IWUSR,
-		iob_read_address, iob_write_address);
-
-static ssize_t iob_read_data(struct device *dev, struct device_attribute *attr,
-			char *buf)
-{
-	return sprintf(buf, "0x%02x\n", inb(iob_addr));
-}
-
-static ssize_t iob_write_data(struct device *dev, struct device_attribute *attr,
-			const char *buf, size_t count)
-{
-	u8 data;
-
-	data = simple_strtoul(buf, NULL, 16);
-	outb(data, iob_addr);
-
-	return count;
-}
-
+static DEVICE_ATTR(iob_address, S_IRUGO | S_IWUSR, iob_read_address, iob_write_address);
 static DEVICE_ATTR(iob_data, S_IRUGO | S_IWUSR, iob_read_data, iob_write_data);
 
 /* PCI */
@@ -597,42 +529,6 @@ static int handle_acpi_vga_cmd(fwdt_generic __user *fg)
 	}
 
 	return err;
-}
-
-static int handle_hardware_io_cmd(fwdt_generic __user *fg)
-{
-	int ret = 0;
-	struct fwdt_io_data fid;
-
-	if (copy_from_user(&fid, fg, sizeof(struct fwdt_io_data)))
-		return -EFAULT;
-
-	switch (fg->parameters.func) {
-	case GET_DATA_BYTE:
-		fid.io_byte = inb(fid.io_address);
-		break;
-	case GET_DATA_WORD:
-		fid.io_word = inw(fid.io_address);
-		break;
-	case SET_DATA_BYTE:
-		outb(fid.io_byte, fid.io_address);
-		break;
-	case SET_DATA_WORD:
-		outw(fid.io_word, fid.io_address);
-		break;
-	default:
-		ret = FWDT_FUNC_NOT_SUPPORTED;
-		goto err;
-		break;
-	}
-
-	fid.parameters.func_status = FWDT_SUCCESS;
-
-	if (copy_to_user(fg, &fid, sizeof(struct fwdt_io_data)))
-		return -EFAULT;
-
- err:
-	return ret;
 }
 
 static int handle_hardware_memory_cmd(fwdt_generic __user *fg)
