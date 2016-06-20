@@ -28,7 +28,7 @@ MODULE_AUTHOR("Alex Hung");
 MODULE_DESCRIPTION("FWDT EC Driver");
 MODULE_LICENSE("GPL");
 
-static acpi_handle ec_device = NULL;
+acpi_handle ec_device = NULL;
 static int ec_offset;
 ssize_t ec_read_data(struct device *dev,
 	struct device_attribute *attr, char *buf)
