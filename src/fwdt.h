@@ -129,4 +129,12 @@ ssize_t cmos_read_data(struct device *dev, struct device_attribute *attr, char *
 ssize_t cmos_write_addr(struct device *dev, struct device_attribute *attr, const char *buf, size_t count);
 int handle_hardware_cmos_cmd(fwdt_generic __user *fg);
 
+/* ACPI EC functions */
+ssize_t ec_read_data(struct device *dev, struct device_attribute *attr, char *buf);
+ssize_t ec_write_data(struct device *dev, struct device_attribute *attr, const char *buf, size_t count);
+ssize_t ec_read_addr(struct device *dev, struct device_attribute *attr, char *buf);
+ssize_t ec_write_addr(struct device *dev, struct device_attribute *attr, const char *buf, size_t count);
+ssize_t ec_exec_qmethod(struct device *dev, struct device_attribute *attr, const char *buf, size_t count);
+int handle_acpi_ec_cmd(fwdt_generic __user *fg);
+
 #endif

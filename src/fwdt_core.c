@@ -544,77 +544,13 @@ static ssize_t pci_write_hardware_ids(struct device *dev,
 static DEVICE_ATTR(pci_id, S_IRUGO | S_IWUSR,
 	pci_read_hardware_ids, pci_write_hardware_ids);
 
-static acpi_handle ec_device = NULL;
-static int ec_offset;
-static ssize_t acpi_read_ec_data(struct device *dev,
-	struct device_attribute *attr, char *buf)
-{
-	int ret;
-	u8 data;
+/* ACPI EC */
+extern acpi_handle ec_device;
+static DEVICE_ATTR(ec_data, S_IRUGO | S_IWUSR, ec_read_data, ec_write_data);
+static DEVICE_ATTR(ec_address, S_IRUGO | S_IWUSR, ec_read_addr, ec_write_addr);
+static DEVICE_ATTR(ec_qmethod, S_IWUSR, NULL, ec_exec_qmethod);
 
-	ret = ec_read(ec_offset, &data);
-	if (ret)
-		return -EINVAL;
-
-	return sprintf(buf, "%x\n", data);;
-}
-
-static ssize_t acpi_write_ec_data(struct device *dev,
-	struct device_attribute *attr, const char *buf, size_t count)
-{
-	int ret;
-	u8 data;
-
-	data = simple_strtoul(buf, NULL, 16);
-	ret = ec_write(ec_offset, data);
-	if (ret)
-		return -EINVAL;
-
-	return count;
-}
-
-static DEVICE_ATTR(ec_data, S_IRUGO | S_IWUSR,
-		acpi_read_ec_data, acpi_write_ec_data);
-
-static ssize_t acpi_read_ec_addr(struct device *dev,
-	struct device_attribute *attr, char *buf)
-{
-	return sprintf(buf, "0x%02x\n", ec_offset);;
-}
-
-static ssize_t acpi_write_ec_addr(struct device *dev,
-	struct device_attribute *attr, const char *buf, size_t count)
-{
-	ec_offset = simple_strtoul(buf, NULL, 16);
-	return count;
-}
-
-static DEVICE_ATTR(ec_address, S_IRUGO | S_IWUSR,
-		acpi_read_ec_addr, acpi_write_ec_addr);
-
-static ssize_t acpi_write_ec_qxx(struct device *dev,
-	struct device_attribute *attr, const char *buf, size_t count)
-{
-	acpi_status status;
-	u8 data;
-	char q_num[5];
-
-	data = simple_strtoul(buf, NULL, 16);
-	sprintf(q_num, "_Q%02X", data);
-
-	status = acpi_evaluate_object(ec_device, q_num, NULL, NULL);
-	if (ACPI_SUCCESS(status))
-		printk("Executed %s\n", q_num);
-	else
-		printk("Failed to execute %s\n", q_num);
-
-	return count;
-}
-
-static DEVICE_ATTR(ec_qmethod, S_IWUSR, NULL, acpi_write_ec_qxx);
-
-
-
+/* CMOS */
 static DEVICE_ATTR(cmos, S_IRUGO | S_IWUSR, cmos_read_data, cmos_write_addr);
 
 static int msr_register;
@@ -743,54 +679,6 @@ static int handle_acpi_vga_cmd(fwdt_generic __user *fg)
 	case GET_VIDEO_DEVICE:
 		break;
 */
-	default:
-		err = FWDT_FUNC_NOT_SUPPORTED;
-		break;
-	}
-
-	return err;
-}
-
-static int handle_acpi_ec_cmd(fwdt_generic __user *fg)
-{
-	int err;
-	struct fwdt_ec_data *fec = (struct fwdt_ec_data*) fg;
-	struct fwdt_ec_data ecd;
-	char q_num[5];
-	acpi_status status;
-
-	if (copy_from_user(&ecd, fec, sizeof(struct fwdt_ec_data)))
-		return -EFAULT;
-
-	switch (fg->parameters.func) {
-	case GET_EC_REGISTER:
-		err = ec_read(ecd.address, &ecd.data);
-		if (copy_to_user(fec, &ecd, sizeof(struct fwdt_ec_data)))
-			return -EFAULT;
-		break;
-	case SET_EC_REGISTER:
-		err = ec_write(ecd.address, ecd.data);
-		break;
-	case CALL_EC_QMETHOD:
-		sprintf(q_num, "_Q%02X", ecd.q_method);
-		status = acpi_evaluate_object(ec_device, q_num, NULL, NULL);
-		if (ACPI_SUCCESS(status))
-			err = FWDT_SUCCESS;
-		else
-			err = FWDT_DEVICE_NOT_FOUND;
-		break;
-	case CHECK_EC_DEVICE:
-		if (ec_device == NULL) {
-			ecd.parameters.func_status = FWDT_DEVICE_NOT_FOUND;
-			err = FWDT_SUCCESS;
-		} else {
-			ecd.parameters.func_status = FWDT_SUCCESS;
-			err = FWDT_SUCCESS;
-		}
-
-		if (copy_to_user(fec, &ecd, sizeof(struct fwdt_ec_data)))
-			return -EFAULT;
-		break;
 	default:
 		err = FWDT_FUNC_NOT_SUPPORTED;
 		break;
