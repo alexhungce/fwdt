@@ -1,5 +1,7 @@
 obj-m += fwdt.o
 
+fwdt-objs := fwdt_core.o
+
 all:
 	make -C /lib/modules/`uname -r`/build M=`pwd` modules
 
