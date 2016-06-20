@@ -17,6 +17,7 @@
 #ifndef __FWDT_LIB_H__
 #define __FWDT_LIB_H__
 
+#include <linux/acpi.h>
 #include "fwdt.h"
 
 /* Memory functions */
@@ -67,5 +68,20 @@ int handle_hardware_cmos_cmd(fwdt_generic __user *fg);
 /* MSR functions */
 ssize_t msr_read_data(struct device *dev, struct device_attribute *attr, char *buf);
 ssize_t msr_set_register(struct device *dev, struct device_attribute *attr, const char *buf, size_t count);
+
+/* ACPI functions */
+acpi_status acpi_handle_locate_callback(acpi_handle handle, u32 level, void *context, void **return_value);
+void acpi_device_path(const char *buf, char *path);
+ssize_t acpi_method_0_0_write(struct device *dev, struct device_attribute *attr, const char *buf, size_t count);
+ssize_t acpi_method_0_1_read(struct device *dev, struct device_attribute *attr, char *buf);
+ssize_t acpi_method_0_1_write(struct device *dev, struct device_attribute *attr, const char *buf, size_t count);
+ssize_t acpi_arg0_read(struct device *dev, struct device_attribute *attr, char *buf);
+ssize_t acpi_arg0_write(struct device *dev, struct device_attribute *attr, const char *buf, size_t count);
+ssize_t acpi_method_1_0_read(struct device *dev, struct device_attribute *attr, char *buf);
+ssize_t acpi_method_1_0_read(struct device *dev, struct device_attribute *attr, char *buf);
+ssize_t acpi_method_1_0_write(struct device *dev, struct device_attribute *attr, const char *buf, size_t count);
+ssize_t acpi_method_1_1_read(struct device *dev, struct device_attribute *attr, char *buf);
+ssize_t acpi_method_1_1_write(struct device *dev, struct device_attribute *attr, const char *buf, size_t count);
+int handle_acpi_aml_cmd(fwdt_generic __user *fg);
 
 #endif
