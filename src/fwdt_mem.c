@@ -40,7 +40,7 @@ ssize_t mem_write_address(struct device *dev,
 ssize_t mem_read_data(struct device *dev, struct device_attribute *attr,
 			char *buf)
 {
-	u32 *mem;
+	volatile u32 *mem;
 	u32 data;
 
 	mem = ioremap(mem_addr, 8);
@@ -53,7 +53,7 @@ ssize_t mem_read_data(struct device *dev, struct device_attribute *attr,
 ssize_t mem_write_data(struct device *dev, struct device_attribute *attr,
 			const char *buf, size_t count)
 {
-	u32 *mem;
+	volatile u32 *mem;
 	u32 data;
 
 	data = simple_strtoul(buf, NULL, 16) & 0xFFFFFFFF;
@@ -68,7 +68,7 @@ ssize_t mem_write_data(struct device *dev, struct device_attribute *attr,
 int handle_hardware_memory_cmd(fwdt_generic __user *fg)
 {
 	int ret = 0;
-	u64 *mem;
+	volatile u64 *mem;
 	struct fwdt_mem_data fmd;
 
 	if (copy_from_user(&fmd, fg, sizeof(struct fwdt_mem_data)))
