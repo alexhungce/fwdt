@@ -2,13 +2,11 @@ apps/ec_reg
 apps/hp_cmos
 bin/
 install.sh
-src/.fwdt.ko.cmd
-src/.fwdt.mod.o.cmd
-src/.fwdt.o.cmd
+src/.*.ko.cmd
+src/.*.o.cmd
 src/.tmp_versions/
 src/Module.symvers
-src/fwdt.ko
+src/*.ko
 src/fwdt.mod.c
-src/fwdt.mod.o
-src/fwdt.o
+src/*.o
 src/modules.order
