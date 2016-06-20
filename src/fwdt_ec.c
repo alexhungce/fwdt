@@ -22,7 +22,7 @@
 #include <acpi/acpi_drivers.h>
 #include <linux/semaphore.h>
 #include <linux/uaccess.h>
-#include "fwdt.h"
+#include "fwdt_lib.h"
 
 MODULE_AUTHOR("Alex Hung");
 MODULE_DESCRIPTION("FWDT EC Driver");

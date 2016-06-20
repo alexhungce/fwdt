@@ -20,7 +20,7 @@
 #include <linux/init.h>
 #include <asm/time.h>
 #include <linux/semaphore.h>
-#include "fwdt.h"
+#include "fwdt_lib.h"
 
 MODULE_AUTHOR("Alex Hung");
 MODULE_DESCRIPTION("FWDT CMOS Driver");
