@@ -21,10 +21,6 @@
 #include <linux/semaphore.h>
 #include "fwdt_lib.h"
 
-MODULE_AUTHOR("Alex Hung");
-MODULE_DESCRIPTION("FWDT CMOS Driver");
-MODULE_LICENSE("GPL");
-
 static int cmos_offset;
 ssize_t cmos_read_data(struct device *dev,
 	struct device_attribute *attr, char *buf)
