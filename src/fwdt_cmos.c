@@ -36,6 +36,10 @@ ssize_t cmos_write_addr(struct device *dev,
 {
 	if (kstrtoint(buf, 16, &cmos_offset))
 		return -EINVAL;
+
+	if (cmos_offset > 0xFF)
+		return -EINVAL;
+
 	return count;
 }
 
