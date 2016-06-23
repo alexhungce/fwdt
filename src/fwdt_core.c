@@ -65,9 +65,8 @@ static DEVICE_ATTR(mem_address, S_IRUGO | S_IWUSR, mem_read_address, mem_write_a
 static DEVICE_ATTR(mem_data, S_IRUGO | S_IWUSR, mem_read_data, mem_write_data);
 
 /* I/O */
-static DEVICE_ATTR(iow_address, S_IRUGO | S_IWUSR, iow_read_address, iow_write_address);
+static DEVICE_ATTR(io_address, S_IRUGO | S_IWUSR, io_read_address, io_write_address);
 static DEVICE_ATTR(iow_data, S_IRUGO | S_IWUSR, iow_read_data, iow_write_data);
-static DEVICE_ATTR(iob_address, S_IRUGO | S_IWUSR, iob_read_address, iob_write_address);
 static DEVICE_ATTR(iob_data, S_IRUGO | S_IWUSR, iob_read_data, iob_write_data);
 
 /* PCI */
@@ -160,9 +159,8 @@ static void cleanup_sysfs(struct platform_device *device)
 	device_remove_file(&device->dev, &dev_attr_video_brightness);
 	device_remove_file(&device->dev, &dev_attr_mem_address);
 	device_remove_file(&device->dev, &dev_attr_mem_data);
-	device_remove_file(&device->dev, &dev_attr_iow_address);
+	device_remove_file(&device->dev, &dev_attr_io_address);
 	device_remove_file(&device->dev, &dev_attr_iow_data);
-	device_remove_file(&device->dev, &dev_attr_iob_address);
 	device_remove_file(&device->dev, &dev_attr_iob_data);
 	device_remove_file(&device->dev, &dev_attr_pci_id);
 	device_remove_file(&device->dev, &dev_attr_pci_reg);
@@ -213,13 +211,10 @@ static int fwdt_setup(struct platform_device *device)
 	err = device_create_file(&device->dev, &dev_attr_mem_data);
 	if (err)
 		goto add_sysfs_error;
-	err = device_create_file(&device->dev, &dev_attr_iow_address);
+	err = device_create_file(&device->dev, &dev_attr_io_address);
 	if (err)
 		goto add_sysfs_error;
 	err = device_create_file(&device->dev, &dev_attr_iow_data);
-	if (err)
-		goto add_sysfs_error;
-	err = device_create_file(&device->dev, &dev_attr_iob_address);
 	if (err)
 		goto add_sysfs_error;
 	err = device_create_file(&device->dev, &dev_attr_iob_data);

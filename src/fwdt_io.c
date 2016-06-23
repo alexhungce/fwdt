@@ -22,17 +22,17 @@
 #include <linux/semaphore.h>
 #include "fwdt_lib.h"
 
-static u16 iow_addr;
-ssize_t iow_read_address(struct device *dev,
+static u16 io_addr;
+ssize_t io_read_address(struct device *dev,
 	struct device_attribute *attr, char *buf)
 {
-	return sprintf(buf, "0x%04x\n", iow_addr);
+	return sprintf(buf, "0x%04x\n", io_addr);
 }
 
-ssize_t iow_write_address(struct device *dev,
+ssize_t io_write_address(struct device *dev,
 	struct device_attribute *attr, const char *buf, size_t count)
 {
-	iow_addr = simple_strtoul(buf, NULL, 16) & 0xFFFF;
+	io_addr = simple_strtoul(buf, NULL, 16) & 0xFFFF;
 
 	return count;
 }
@@ -40,7 +40,7 @@ ssize_t iow_write_address(struct device *dev,
 ssize_t iow_read_data(struct device *dev, struct device_attribute *attr,
 			char *buf)
 {
-	return sprintf(buf, "0x%04x\n", inw(iow_addr));
+	return sprintf(buf, "0x%04x\n", inw(io_addr));
 }
 
 ssize_t iow_write_data(struct device *dev, struct device_attribute *attr,
@@ -49,22 +49,7 @@ ssize_t iow_write_data(struct device *dev, struct device_attribute *attr,
 	u16 data;
 
 	data = simple_strtoul(buf, NULL, 16);
-	outw(data, iow_addr);
-
-	return count;
-}
-
-static u16 iob_addr;
-ssize_t iob_read_address(struct device *dev,
-	struct device_attribute *attr, char *buf)
-{
-	return sprintf(buf, "0x%04x\n", iob_addr);
-}
-
-ssize_t iob_write_address(struct device *dev,
-	struct device_attribute *attr, const char *buf, size_t count)
-{
-	iob_addr = simple_strtoul(buf, NULL, 16) & 0xFFFF;
+	outw(data, io_addr);
 
 	return count;
 }
@@ -72,7 +57,7 @@ ssize_t iob_write_address(struct device *dev,
 ssize_t iob_read_data(struct device *dev, struct device_attribute *attr,
 			char *buf)
 {
-	return sprintf(buf, "0x%02x\n", inb(iob_addr));
+	return sprintf(buf, "0x%02x\n", inb(io_addr));
 }
 
 ssize_t iob_write_data(struct device *dev, struct device_attribute *attr,
@@ -81,7 +66,7 @@ ssize_t iob_write_data(struct device *dev, struct device_attribute *attr,
 	u8 data;
 
 	data = simple_strtoul(buf, NULL, 16);
-	outb(data, iob_addr);
+	outb(data, io_addr);
 
 	return count;
 }
