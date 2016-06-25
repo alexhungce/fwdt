@@ -95,7 +95,7 @@ ssize_t acpi_video_read_brightness(struct device *dev,
 
 	for (i = 0; i < obj->package.count; i++) {
 		o =  (union acpi_object *) &obj->package.elements[i];
-		if (o->type != ACPI_TYPE_INTEGER)
+		if (unlikely(o->type != ACPI_TYPE_INTEGER))
 			continue;
 		printk("Brightness[%d] = %d\n", i, (u32) o->integer.value);
 	}
@@ -204,7 +204,7 @@ static int get_acpi_vga_br_levels(struct fwdt_brightness *fbl)
 	fbl->num_of_levels = obj->package.count;
 	for (i = 0; i < obj->package.count; i++) {
 		o =  (union acpi_object *) &obj->package.elements[i];
-		if (o->type != ACPI_TYPE_INTEGER)
+		if (unlikely(o->type != ACPI_TYPE_INTEGER))
 			continue;
 		fbl->levels[i] = (u32) o->integer.value;
 	}

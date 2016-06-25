@@ -76,7 +76,7 @@ int handle_hardware_io_cmd(fwdt_generic __user *fg)
 	int ret = 0;
 	struct fwdt_io_data fid;
 
-	if (copy_from_user(&fid, fg, sizeof(struct fwdt_io_data)))
+	if (unlikely(copy_from_user(&fid, fg, sizeof(struct fwdt_io_data))))
 		return -EFAULT;
 
 	switch (fg->parameters.func) {
@@ -100,7 +100,7 @@ int handle_hardware_io_cmd(fwdt_generic __user *fg)
 
 	fid.parameters.func_status = FWDT_SUCCESS;
 
-	if (copy_to_user(fg, &fid, sizeof(struct fwdt_io_data)))
+	if (unlikely(copy_to_user(fg, &fid, sizeof(struct fwdt_io_data))))
 		return -EFAULT;
 
  err:

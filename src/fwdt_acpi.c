@@ -185,7 +185,7 @@ int handle_acpi_aml_cmd(fwdt_generic __user *fg)
 	int ret = 0;
 	struct fwdt_acpi_data fd;
 
-	if (copy_from_user(&fd, fg, sizeof(struct fwdt_acpi_data)))
+	if (unlikely(copy_from_user(&fd, fg, sizeof(struct fwdt_acpi_data))))
 		return -EFAULT;
 
 	switch (fg->parameters.func) {
@@ -200,7 +200,7 @@ int handle_acpi_aml_cmd(fwdt_generic __user *fg)
 
 	fd.parameters.func_status = FWDT_SUCCESS;
 
-	if (copy_to_user(fg, &fd, sizeof(struct fwdt_acpi_data)))
+	if (unlikely(copy_to_user(fg, &fd, sizeof(struct fwdt_acpi_data))))
 		return -EFAULT;
 
  err:

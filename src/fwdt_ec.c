@@ -91,13 +91,13 @@ int handle_acpi_ec_cmd(fwdt_generic __user *fg)
 	char q_num[5];
 	acpi_status status;
 
-	if (copy_from_user(&ecd, fec, sizeof(struct fwdt_ec_data)))
+	if (unlikely(copy_from_user(&ecd, fec, sizeof(struct fwdt_ec_data))))
 		return -EFAULT;
 
 	switch (fg->parameters.func) {
 	case GET_EC_REGISTER:
 		err = ec_read(ecd.address, &ecd.data);
-		if (copy_to_user(fec, &ecd, sizeof(struct fwdt_ec_data)))
+		if (unlikely(copy_to_user(fec, &ecd, sizeof(struct fwdt_ec_data))))
 			return -EFAULT;
 		break;
 	case SET_EC_REGISTER:
@@ -120,7 +120,7 @@ int handle_acpi_ec_cmd(fwdt_generic __user *fg)
 			err = FWDT_SUCCESS;
 		}
 
-		if (copy_to_user(fec, &ecd, sizeof(struct fwdt_ec_data)))
+		if (unlikely(copy_to_user(fec, &ecd, sizeof(struct fwdt_ec_data))))
 			return -EFAULT;
 		break;
 	default:

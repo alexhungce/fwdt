@@ -48,7 +48,7 @@ int handle_hardware_cmos_cmd(fwdt_generic __user *fg)
 	int ret = 0;
 	struct fwdt_cmos_data fcd;
 
-	if (copy_from_user(&fcd, fg, sizeof(struct fwdt_cmos_data)))
+	if (unlikely(copy_from_user(&fcd, fg, sizeof(struct fwdt_cmos_data))))
 		return -EFAULT;
 
 	switch (fg->parameters.func) {
@@ -63,7 +63,7 @@ int handle_hardware_cmos_cmd(fwdt_generic __user *fg)
 
 	fcd.parameters.func_status = FWDT_SUCCESS;
 
-	if (copy_to_user(fg, &fcd, sizeof(struct fwdt_cmos_data)))
+	if (unlikely(copy_to_user(fg, &fcd, sizeof(struct fwdt_cmos_data))))
 		return -EFAULT;
 
  err:

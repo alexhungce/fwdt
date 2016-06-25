@@ -71,7 +71,7 @@ int handle_hardware_memory_cmd(fwdt_generic __user *fg)
 	volatile u64 *mem;
 	struct fwdt_mem_data fmd;
 
-	if (copy_from_user(&fmd, fg, sizeof(struct fwdt_mem_data)))
+	if (unlikely(copy_from_user(&fmd, fg, sizeof(struct fwdt_mem_data))))
 		return -EFAULT;
 
 	mem = ioremap(fmd.mem_address, 8);
@@ -91,7 +91,7 @@ int handle_hardware_memory_cmd(fwdt_generic __user *fg)
 
 	fmd.parameters.func_status = FWDT_SUCCESS;
 
-	if (copy_to_user(fg, &fmd, sizeof(struct fwdt_mem_data)))
+	if (unlikely(copy_to_user(fg, &fmd, sizeof(struct fwdt_mem_data))))
 		ret = -EFAULT;
 
  err:
