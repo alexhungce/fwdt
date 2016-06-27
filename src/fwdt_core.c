@@ -221,17 +221,17 @@ static int fwdt_setup(struct platform_device *device)
 	status = acpi_get_devices("PNP0C09", acpi_handle_locate_callback,
 				  NULL, &ec_device);
 	if (ACPI_SUCCESS(status)) {
-		if (!ec_device)
-			goto add_sysfs_done;
-		err = device_create_file(&device->dev, &dev_attr_ec_address);
-		if (err)
-			goto add_sysfs_error;
-		err = device_create_file(&device->dev, &dev_attr_ec_data);
-		if (err)
-			goto add_sysfs_error;
-		err = device_create_file(&device->dev, &dev_attr_ec_qmethod);
-		if (err)
-			goto add_sysfs_error;
+		if (ec_device) {
+			err = device_create_file(&device->dev, &dev_attr_ec_address);
+			if (err)
+				goto add_sysfs_error;
+			err = device_create_file(&device->dev, &dev_attr_ec_data);
+			if (err)
+				goto add_sysfs_error;
+			err = device_create_file(&device->dev, &dev_attr_ec_qmethod);
+			if (err)
+				goto add_sysfs_error;
+		}
 	}
 #endif
 
@@ -265,8 +265,6 @@ static int fwdt_setup(struct platform_device *device)
 	err = device_create_file(&device->dev, &dev_attr_msr);
 	if (err)
 		goto add_sysfs_error;
-
-add_sysfs_done:
 
 	return 0;
 
