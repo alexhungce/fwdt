@@ -20,6 +20,8 @@
 #include <linux/acpi.h>
 #include "fwdt.h"
 
+#ifdef CONFIG_ACPI
+
 /* ACPI functions */
 acpi_status acpi_handle_locate_callback(acpi_handle handle, u32 level, void *context, void **return_value);
 void acpi_device_path(const char *buf, char *path);
@@ -41,6 +43,16 @@ ssize_t acpi_video_write_device(struct device *dev, struct device_attribute *att
 ssize_t acpi_video_read_brightness(struct device *dev, struct device_attribute *attr, char *buf);
 ssize_t acpi_video_write_brightness(struct device *dev, struct device_attribute *attr, const char *buf, size_t count);
 int handle_acpi_vga_cmd(fwdt_generic __user *fg);
+
+/* ACPI EC functions */
+ssize_t ec_read_data(struct device *dev, struct device_attribute *attr, char *buf);
+ssize_t ec_write_data(struct device *dev, struct device_attribute *attr, const char *buf, size_t count);
+ssize_t ec_read_addr(struct device *dev, struct device_attribute *attr, char *buf);
+ssize_t ec_write_addr(struct device *dev, struct device_attribute *attr, const char *buf, size_t count);
+ssize_t ec_exec_qmethod(struct device *dev, struct device_attribute *attr, const char *buf, size_t count);
+int handle_acpi_ec_cmd(fwdt_generic __user *fg);
+
+#endif
 
 /* Memory functions */
 ssize_t mem_read_address(struct device *dev, struct device_attribute *attr, char *buf);
@@ -71,14 +83,6 @@ ssize_t pci_read_offset(struct device *dev, struct device_attribute *attr, char 
 ssize_t pci_write_offset(struct device *dev, struct device_attribute *attr, const char *buf, size_t count);
 ssize_t pci_write_ids(struct device *dev, struct device_attribute *attr, const char *buf, size_t count);
 ssize_t pci_read_ids(struct device *dev, struct device_attribute *attr, char *buf);;
-
-/* ACPI EC functions */
-ssize_t ec_read_data(struct device *dev, struct device_attribute *attr, char *buf);
-ssize_t ec_write_data(struct device *dev, struct device_attribute *attr, const char *buf, size_t count);
-ssize_t ec_read_addr(struct device *dev, struct device_attribute *attr, char *buf);
-ssize_t ec_write_addr(struct device *dev, struct device_attribute *attr, const char *buf, size_t count);
-ssize_t ec_exec_qmethod(struct device *dev, struct device_attribute *attr, const char *buf, size_t count);
-int handle_acpi_ec_cmd(fwdt_generic __user *fg);
 
 /* CMOS functions */
 ssize_t cmos_read_data(struct device *dev, struct device_attribute *attr, char *buf);

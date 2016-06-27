@@ -24,6 +24,8 @@
 #include <linux/semaphore.h>
 #include "fwdt_lib.h"
 
+#ifdef CONFIG_ACPI
+
 acpi_status acpi_handle_locate_callback(acpi_handle handle,
 			u32 level, void *context, void **return_value)
 {
@@ -206,3 +208,5 @@ int handle_acpi_aml_cmd(fwdt_generic __user *fg)
  err:
 	return ret;
 }
+
+#endif

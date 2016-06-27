@@ -22,6 +22,8 @@
 #include <linux/semaphore.h>
 #include "fwdt_lib.h"
 
+#ifdef CONFIG_ACPI
+
 int acpi_lcd_query_levels(acpi_handle *device, union acpi_object **levels)
 {
 	int status;
@@ -239,3 +241,5 @@ int handle_acpi_vga_cmd(fwdt_generic __user *fg)
 
 	return err;
 }
+
+#endif

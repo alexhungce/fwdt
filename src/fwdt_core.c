@@ -48,6 +48,8 @@ static struct platform_driver fwdt_driver = {
 
 static struct platform_device *fwdt_platform_dev;
 
+#ifdef CONFIG_ACPI
+
 /* ACPI */
 static DEVICE_ATTR(acpi_method_0_0, S_IWUSR, NULL, acpi_method_0_0_write);
 static DEVICE_ATTR(acpi_method_0_1, S_IRUGO | S_IWUSR, acpi_method_0_1_read, acpi_method_0_1_write);
@@ -59,6 +61,14 @@ static DEVICE_ATTR(acpi_method_1_1, S_IRUGO | S_IWUSR, acpi_method_1_1_read, acp
 extern acpi_handle video_device;
 static DEVICE_ATTR(video_device, S_IWUSR, NULL, acpi_video_write_device);
 static DEVICE_ATTR(video_brightness, S_IRUGO | S_IWUSR, acpi_video_read_brightness, acpi_video_write_brightness);
+
+/* ACPI EC */
+extern acpi_handle ec_device;
+static DEVICE_ATTR(ec_data, S_IRUGO | S_IWUSR, ec_read_data, ec_write_data);
+static DEVICE_ATTR(ec_address, S_IRUGO | S_IWUSR, ec_read_addr, ec_write_addr);
+static DEVICE_ATTR(ec_qmethod, S_IWUSR, NULL, ec_exec_qmethod);
+
+#endif
 
 /* Memory */
 static DEVICE_ATTR(mem_address, S_IRUGO | S_IWUSR, mem_read_address, mem_write_address);
@@ -75,12 +85,6 @@ static DEVICE_ATTR(pci_data, S_IRUGO | S_IWUSR, pci_read_data, pci_write_data);
 static DEVICE_ATTR(pci_reg, S_IRUGO | S_IWUSR, pci_read_offset, pci_write_offset);
 static DEVICE_ATTR(pci_id, S_IRUGO | S_IWUSR, pci_read_ids, pci_write_ids);
 
-/* ACPI EC */
-extern acpi_handle ec_device;
-static DEVICE_ATTR(ec_data, S_IRUGO | S_IWUSR, ec_read_data, ec_write_data);
-static DEVICE_ATTR(ec_address, S_IRUGO | S_IWUSR, ec_read_addr, ec_write_addr);
-static DEVICE_ATTR(ec_qmethod, S_IWUSR, NULL, ec_exec_qmethod);
-
 /* CMOS */
 static DEVICE_ATTR(cmos, S_IRUGO | S_IWUSR, cmos_read_data, cmos_write_addr);
 
@@ -93,9 +97,17 @@ static long fwdt_runtime_ioctl(struct file *file, unsigned int cmd,
 	int err;
 
 	switch (cmd) {
+#ifdef CONFIG_ACPI
 	case FWDT_ACPI_VGA_CMD:
 		err = handle_acpi_vga_cmd((fwdt_generic __user *) arg);
 		break;
+	case FWDT_ACPI_EC_CMD:
+		err = handle_acpi_ec_cmd((fwdt_generic __user *) arg);
+		break;
+	case FWDT_ACPI_AML_CMD:
+		err = handle_acpi_aml_cmd((fwdt_generic __user *) arg);
+		break;
+#endif
 	case FWDT_HW_ACCESS_IO_CMD:
 		err = handle_hardware_io_cmd((fwdt_generic __user *) arg);
 		break;
@@ -105,12 +117,7 @@ static long fwdt_runtime_ioctl(struct file *file, unsigned int cmd,
 	case FWDT_HW_ACCESS_CMOS_CMD:
 		err = handle_hardware_cmos_cmd((fwdt_generic __user *) arg);
 		break;
-	case FWDT_ACPI_EC_CMD:
-		err = handle_acpi_ec_cmd((fwdt_generic __user *) arg);
-		break;
-	case FWDT_ACPI_AML_CMD:
-		err = handle_acpi_aml_cmd((fwdt_generic __user *) arg);
-		break;
+
 	default:
 		err = FWDT_FUNC_NOT_SUPPORTED;
 		break;
@@ -150,6 +157,7 @@ static struct miscdevice fwdt_runtime_dev = {
 
 static void cleanup_sysfs(struct platform_device *device)
 {
+#ifdef CONFIG_ACPI
 	device_remove_file(&device->dev, &dev_attr_acpi_arg0);
 	device_remove_file(&device->dev, &dev_attr_acpi_method_1_0);
 	device_remove_file(&device->dev, &dev_attr_acpi_method_1_1);
@@ -157,16 +165,6 @@ static void cleanup_sysfs(struct platform_device *device)
 	device_remove_file(&device->dev, &dev_attr_acpi_method_0_0);
 	device_remove_file(&device->dev, &dev_attr_video_device);
 	device_remove_file(&device->dev, &dev_attr_video_brightness);
-	device_remove_file(&device->dev, &dev_attr_mem_address);
-	device_remove_file(&device->dev, &dev_attr_mem_data);
-	device_remove_file(&device->dev, &dev_attr_io_address);
-	device_remove_file(&device->dev, &dev_attr_iow_data);
-	device_remove_file(&device->dev, &dev_attr_iob_data);
-	device_remove_file(&device->dev, &dev_attr_pci_id);
-	device_remove_file(&device->dev, &dev_attr_pci_reg);
-	device_remove_file(&device->dev, &dev_attr_pci_data);
-	device_remove_file(&device->dev, &dev_attr_cmos);
-	device_remove_file(&device->dev, &dev_attr_msr);
 
 	if (video_device)
 		video_device = NULL;
@@ -177,11 +175,25 @@ static void cleanup_sysfs(struct platform_device *device)
 		device_remove_file(&device->dev, &dev_attr_ec_qmethod);
 		ec_device = NULL;
 	}
+#endif
+
+	device_remove_file(&device->dev, &dev_attr_mem_address);
+	device_remove_file(&device->dev, &dev_attr_mem_data);
+	device_remove_file(&device->dev, &dev_attr_io_address);
+	device_remove_file(&device->dev, &dev_attr_iow_data);
+	device_remove_file(&device->dev, &dev_attr_iob_data);
+	device_remove_file(&device->dev, &dev_attr_pci_id);
+	device_remove_file(&device->dev, &dev_attr_pci_reg);
+	device_remove_file(&device->dev, &dev_attr_pci_data);
+	device_remove_file(&device->dev, &dev_attr_cmos);
+	device_remove_file(&device->dev, &dev_attr_msr);
 }
 
 static int fwdt_setup(struct platform_device *device)
 {
 	int err;
+
+#ifdef CONFIG_ACPI
 	acpi_status status;
 
 	err = device_create_file(&device->dev, &dev_attr_acpi_arg0);
@@ -205,6 +217,24 @@ static int fwdt_setup(struct platform_device *device)
 	err = device_create_file(&device->dev, &dev_attr_video_brightness);
 	if (err)
 		goto add_sysfs_error;
+
+	status = acpi_get_devices("PNP0C09", acpi_handle_locate_callback,
+				  NULL, &ec_device);
+	if (ACPI_SUCCESS(status)) {
+		if (!ec_device)
+			goto add_sysfs_done;
+		err = device_create_file(&device->dev, &dev_attr_ec_address);
+		if (err)
+			goto add_sysfs_error;
+		err = device_create_file(&device->dev, &dev_attr_ec_data);
+		if (err)
+			goto add_sysfs_error;
+		err = device_create_file(&device->dev, &dev_attr_ec_qmethod);
+		if (err)
+			goto add_sysfs_error;
+	}
+#endif
+
 	err = device_create_file(&device->dev, &dev_attr_mem_address);
 	if (err)
 		goto add_sysfs_error;
@@ -235,22 +265,6 @@ static int fwdt_setup(struct platform_device *device)
 	err = device_create_file(&device->dev, &dev_attr_msr);
 	if (err)
 		goto add_sysfs_error;
-
-	status = acpi_get_devices("PNP0C09", acpi_handle_locate_callback,
-				  NULL, &ec_device);
-	if (ACPI_SUCCESS(status)) {
-		if (!ec_device)
-			goto add_sysfs_done;
-		err = device_create_file(&device->dev, &dev_attr_ec_address);
-		if (err)
-			goto add_sysfs_error;
-		err = device_create_file(&device->dev, &dev_attr_ec_data);
-		if (err)
-			goto add_sysfs_error;
-		err = device_create_file(&device->dev, &dev_attr_ec_qmethod);
-		if (err)
-			goto add_sysfs_error;
-	}
 
 add_sysfs_done:
 

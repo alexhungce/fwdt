@@ -22,6 +22,8 @@
 #include <linux/uaccess.h>
 #include "fwdt_lib.h"
 
+#ifdef CONFIG_ACPI
+
 acpi_handle ec_device = NULL;
 static int ec_offset;
 ssize_t ec_read_data(struct device *dev,
@@ -130,3 +132,5 @@ int handle_acpi_ec_cmd(fwdt_generic __user *fg)
 
 	return err;
 }
+
+#endif
