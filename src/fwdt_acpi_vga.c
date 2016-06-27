@@ -43,12 +43,10 @@ int acpi_lcd_query_levels(acpi_handle *device, union acpi_object **levels)
 	}
 
 	*levels = obj;
-
 	return 0;
 
-      err:
+ err:
 	kfree(buffer.pointer);
-
 	return status;
 }
 
@@ -102,7 +100,7 @@ ssize_t acpi_video_read_brightness(struct device *dev,
 		printk("Brightness[%d] = %d\n", i, (u32) o->integer.value);
 	}
 
-      no_bcl:
+ no_bcl:
 
 	return sprintf(buf, "%lld\n", bqc_level);
 }

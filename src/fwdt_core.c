@@ -268,7 +268,7 @@ static int fwdt_setup(struct platform_device *device)
 
 	return 0;
 
-add_sysfs_error:
+ add_sysfs_error:
 	cleanup_sysfs(device);
 	return err;
 }
@@ -309,11 +309,11 @@ static int __init fwdt_init(void)
 
 	return 0;
 
-err_device_add:
+ err_device_add:
 	platform_device_put(fwdt_platform_dev);
-err_device_alloc:
+ err_device_alloc:
 	platform_driver_unregister(&fwdt_driver);
-err_driver_reg:
+ err_driver_reg:
 
 	return err;
 }
