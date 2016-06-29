@@ -29,8 +29,7 @@ ssize_t pci_read_data(struct device *dev,
 	struct pci_dev *pdev = NULL;
 	int data;
 
-	pdev = pci_get_subsys(pci_dev.vid, pci_dev.did,
-				PCI_ANY_ID, PCI_ANY_ID, NULL);
+	pdev = pci_get_device(pci_dev.vid, pci_dev.did, NULL);
 	if (pdev == NULL) {
 		pr_info("pci device [%04x:%04x] is not found\n",
 			pci_dev.vid, pci_dev.did);
@@ -49,8 +48,7 @@ ssize_t pci_write_data(struct device *dev,
 	int data;
 
 	data = simple_strtoul(buf, NULL, 16) & 0xFFFFFFFF;
-	pdev = pci_get_subsys(pci_dev.vid, pci_dev.did,
-				PCI_ANY_ID, PCI_ANY_ID, NULL);
+	pdev = pci_get_device(pci_dev.vid, pci_dev.did, NULL);
 	if (pdev)
 		pci_write_config_dword(pdev, pci_dev.offset, data);
 	else
