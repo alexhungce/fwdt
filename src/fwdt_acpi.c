@@ -37,8 +37,11 @@ acpi_status acpi_handle_locate_callback(acpi_handle handle,
 void acpi_device_path(const char *buf, char *path)
 {
 	path[0] = '\\';
-	strncpy(path + 1, buf, strlen(buf));
-	path[strlen(buf)] = 0;
+	if (strlen(buf) < 80)  {
+		strncpy(path + 1, buf, strlen(buf));
+		path[strlen(buf)] = 0;
+	} else
+		path[1] = 0;
 }
 
 ssize_t acpi_method_0_0_write(struct device *dev,
@@ -46,7 +49,7 @@ ssize_t acpi_method_0_0_write(struct device *dev,
 {
 	acpi_handle device;
 	acpi_status status;
-	char path[255];
+	char path[80];
 
 	acpi_device_path(buf, path);
 
@@ -66,7 +69,7 @@ ssize_t acpi_method_0_0_write(struct device *dev,
 	return count;
 }
 
-static char device_path_0_1[256];
+static char device_path_0_1[80];
 ssize_t acpi_method_0_1_read(struct device *dev,
 	struct device_attribute *attr, char *buf)
 {
@@ -113,7 +116,7 @@ ssize_t acpi_arg0_write(struct device *dev,
 	return count;
 }
 
-static char acpi_method_1_x[256];
+static char acpi_method_1_x[80];
 ssize_t acpi_method_1_0_read(struct device *dev,
 		struct device_attribute *attr, char *buf)
 {
