@@ -233,7 +233,7 @@ int handle_acpi_vga_cmd(fwdt_generic __user *fg)
 		break;
 */
 	default:
-		err = FWDT_FUNC_NOT_SUPPORTED;
+		err = -ENOTTY;
 		break;
 	}
 

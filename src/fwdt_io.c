@@ -93,7 +93,7 @@ int handle_hardware_io_cmd(fwdt_generic __user *fg)
 		outw(fid.io_word, fid.io_address);
 		break;
 	default:
-		ret = FWDT_FUNC_NOT_SUPPORTED;
+		ret = -ENOTTY;
 		goto err;
 		break;
 	}

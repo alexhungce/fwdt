@@ -119,7 +119,7 @@ static long fwdt_runtime_ioctl(struct file *file, unsigned int cmd,
 		break;
 
 	default:
-		err = FWDT_FUNC_NOT_SUPPORTED;
+		err = -ENOTTY;
 		break;
 	}
 

@@ -51,7 +51,6 @@ typedef struct {
 #define FWDT_SUCCESS		0
 #define FWDT_FAIL		1
 #define FWDT_DEVICE_NOT_FOUND	-2
-#define FWDT_FUNC_NOT_SUPPORTED	-1
 
 struct fwdt_brightness {
 	fwdt_parameter	parameters;

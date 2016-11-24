@@ -198,7 +198,7 @@ int handle_acpi_aml_cmd(fwdt_generic __user *fg)
 		// TODO evaluate acpi object
 		break;
 	default:
-		ret = FWDT_FUNC_NOT_SUPPORTED;
+		ret = -ENOTTY;
 		goto err;
 		break;
 	}

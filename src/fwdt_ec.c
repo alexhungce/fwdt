@@ -126,7 +126,7 @@ int handle_acpi_ec_cmd(fwdt_generic __user *fg)
 			return -EFAULT;
 		break;
 	default:
-		err = FWDT_FUNC_NOT_SUPPORTED;
+		err = -ENOTTY;
 		break;
 	}
 
