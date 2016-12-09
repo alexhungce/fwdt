@@ -19,6 +19,7 @@
 #include <linux/module.h>
 #include <asm/time.h>
 #include <linux/semaphore.h>
+#include <linux/uaccess.h>
 #include "fwdt_lib.h"
 
 static int cmos_offset;
