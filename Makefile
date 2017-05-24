@@ -1,6 +1,6 @@
 all:
-	make -C src
-	make -C apps hp_cmos ec_reg
+	make -Werror -C src
+	make -Werror -C apps hp_cmos ec_reg
 	mkdir -p bin
 	install src/fwdt.ko bin/
 	install apps/hp_cmos bin/
