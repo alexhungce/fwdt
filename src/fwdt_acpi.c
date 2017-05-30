@@ -146,7 +146,7 @@ ssize_t acpi_method_1_0_read(struct device *dev,
 	return sprintf(buf, "0x%08x\n", ACPI_SUCCESS(status));
 }
 
-ssize_t acpi_method_1_0_write(struct device *dev,
+ssize_t acpi_method_name_write(struct device *dev,
 		struct device_attribute *attr, const char *buf, size_t count)
 {
 	acpi_handle device;
@@ -179,22 +179,6 @@ ssize_t acpi_method_1_1_read(struct device *dev,
 		printk("Failed to execute %s\n", acpi_method_1_x);
 
 	return sprintf(buf, "0x%08llx\n", output);
-}
-
-ssize_t acpi_method_1_1_write(struct device *dev,
-		struct device_attribute *attr, const char *buf, size_t count)
-{
-	acpi_handle device;
-	acpi_status status;
-
-	acpi_device_path(buf, acpi_method_1_x);
-
-	status = acpi_get_handle(NULL, acpi_method_1_x, &device);
-	if (!ACPI_SUCCESS(status)) {
-		printk("Failed to find acpi method: %s\n", acpi_method_1_x);
-	}
-
-	return count;
 }
 
 ssize_t acpi_method_2_0_read(struct device *dev,

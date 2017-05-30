@@ -55,9 +55,9 @@ static DEVICE_ATTR(acpi_method_0_0, S_IWUSR, NULL, acpi_method_0_0_write);
 static DEVICE_ATTR(acpi_method_0_1, S_IRUGO | S_IWUSR, acpi_method_0_1_read, acpi_method_0_1_write);
 static DEVICE_ATTR(acpi_arg0, S_IRUGO | S_IWUSR, acpi_arg0_read, acpi_arg0_write);
 static DEVICE_ATTR(acpi_arg1, S_IRUGO | S_IWUSR, acpi_arg1_read, acpi_arg1_write);
-static DEVICE_ATTR(acpi_method_1_0, S_IRUGO | S_IWUSR, acpi_method_1_0_read, acpi_method_1_0_write);
-static DEVICE_ATTR(acpi_method_1_1, S_IRUGO | S_IWUSR, acpi_method_1_1_read, acpi_method_1_1_write);
-static DEVICE_ATTR(acpi_method_2_0, S_IRUGO | S_IWUSR, acpi_method_2_0_read, acpi_method_1_0_write);
+static DEVICE_ATTR(acpi_method_1_0, S_IRUGO | S_IWUSR, acpi_method_1_0_read, acpi_method_name_write);
+static DEVICE_ATTR(acpi_method_1_1, S_IRUGO | S_IWUSR, acpi_method_1_1_read, acpi_method_name_write);
+static DEVICE_ATTR(acpi_method_2_0, S_IRUGO | S_IWUSR, acpi_method_2_0_read, acpi_method_name_write);
 
 /* ACPI VGA */
 extern acpi_handle video_device;
