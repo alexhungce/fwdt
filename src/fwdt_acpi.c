@@ -121,11 +121,8 @@ ssize_t acpi_method_1_0_read(struct device *dev,
 		struct device_attribute *attr, char *buf)
 {
 	acpi_status status;
-	union acpi_object arg0 = { ACPI_TYPE_INTEGER };
-	struct acpi_object_list args = { 1, &arg0 };
 
-	arg0.integer.value = acpi_arg0;
-	status = acpi_evaluate_object(NULL, acpi_method_1_x, &args, NULL);
+	status = acpi_execute_simple_method(NULL, acpi_method_1_x, acpi_arg0);
 	if (ACPI_SUCCESS(status))
 		printk("Executed %s\n", acpi_method_1_x);
 	else
