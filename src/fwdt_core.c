@@ -107,6 +107,18 @@ static struct attribute_group acpi_attr_group = {
 	.name   = NULL,         /* put in device directory */
 	.attrs  = fwdt_acpi_sysfs_entries,
 };
+
+static struct attribute *fwdt_acpi_ec_sysfs_entries[] = {
+	&dev_attr_ec_address.attr,
+	&dev_attr_ec_data.attr,
+	&dev_attr_ec_qmethod.attr,
+	NULL,
+};
+
+static struct attribute_group acpi_ec_attr_group = {
+	.name   = NULL,         /* put in device directory */
+	.attrs  = fwdt_acpi_ec_sysfs_entries,
+};
 #endif
 
 static long fwdt_runtime_ioctl(struct file *file, unsigned int cmd,
@@ -182,9 +194,7 @@ static void cleanup_sysfs(struct platform_device *device)
 		video_device = NULL;
 
 	if (ec_device) {
-		device_remove_file(&device->dev, &dev_attr_ec_address);
-		device_remove_file(&device->dev, &dev_attr_ec_data);
-		device_remove_file(&device->dev, &dev_attr_ec_qmethod);
+		sysfs_remove_group(&device->dev.kobj, &acpi_ec_attr_group);
 		ec_device = NULL;
 	}
 #endif
@@ -216,13 +226,7 @@ static int fwdt_setup(struct platform_device *device)
 				  NULL, &ec_device);
 	if (ACPI_SUCCESS(status)) {
 		if (ec_device) {
-			err = device_create_file(&device->dev, &dev_attr_ec_address);
-			if (err)
-				goto add_sysfs_error;
-			err = device_create_file(&device->dev, &dev_attr_ec_data);
-			if (err)
-				goto add_sysfs_error;
-			err = device_create_file(&device->dev, &dev_attr_ec_qmethod);
+			err = sysfs_create_group(&device->dev.kobj, &acpi_ec_attr_group);
 			if (err)
 				goto add_sysfs_error;
 		}
