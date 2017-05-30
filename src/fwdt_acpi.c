@@ -116,6 +116,21 @@ ssize_t acpi_arg0_write(struct device *dev,
 	return count;
 }
 
+static u32 acpi_arg1;
+ssize_t acpi_arg1_read(struct device *dev,
+		struct device_attribute *attr, char *buf)
+{
+	return sprintf(buf, "0x%08x\n", acpi_arg1);
+}
+
+ssize_t acpi_arg1_write(struct device *dev,
+		struct device_attribute *attr, const char *buf, size_t count)
+{
+	acpi_arg1 = simple_strtoul(buf, NULL, 16);
+
+	return count;
+}
+
 static char acpi_method_1_x[80];
 ssize_t acpi_method_1_0_read(struct device *dev,
 		struct device_attribute *attr, char *buf)

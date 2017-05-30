@@ -30,6 +30,8 @@ ssize_t acpi_method_0_1_read(struct device *dev, struct device_attribute *attr, 
 ssize_t acpi_method_0_1_write(struct device *dev, struct device_attribute *attr, const char *buf, size_t count);
 ssize_t acpi_arg0_read(struct device *dev, struct device_attribute *attr, char *buf);
 ssize_t acpi_arg0_write(struct device *dev, struct device_attribute *attr, const char *buf, size_t count);
+ssize_t acpi_arg1_read(struct device *dev, struct device_attribute *attr, char *buf);
+ssize_t acpi_arg1_write(struct device *dev, struct device_attribute *attr, const char *buf, size_t count);
 ssize_t acpi_method_1_0_read(struct device *dev, struct device_attribute *attr, char *buf);
 ssize_t acpi_method_1_0_read(struct device *dev, struct device_attribute *attr, char *buf);
 ssize_t acpi_method_1_0_write(struct device *dev, struct device_attribute *attr, const char *buf, size_t count);
