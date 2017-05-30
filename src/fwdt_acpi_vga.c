@@ -135,19 +135,16 @@ static int get_acpi_vga_brightness(struct fwdt_brightness *fb)
 	status = acpi_get_handle(NULL, fb->lcd_path, &lcd_device);
 	if (!ACPI_SUCCESS(status)) {
 		pr_info("Failed to find acpi lcd device: %s\n", fb->lcd_path);
-		fb->parameters.func_status = FWDT_DEVICE_NOT_FOUND;
 		goto err;
 	}
 
 	status = acpi_evaluate_integer(lcd_device, "_BQC", NULL, &bqc_level);
 	if (!ACPI_SUCCESS(status)) {
 		pr_info("Failed to read brightness level!\n");
-		fb->parameters.func_status = FWDT_FAIL;
 		goto err;
 	}
 
 	fb->brightness_level = bqc_level;
-	fb->parameters.func_status = FWDT_SUCCESS;
  err:
 	return status;
 }
@@ -165,18 +162,15 @@ static int set_acpi_vga_brightness(struct fwdt_brightness *fb)
 	status = acpi_get_handle(NULL, fb->lcd_path, &lcd_device);
 	if (!ACPI_SUCCESS(status)) {
 		pr_info("Failed to find acpi lcd device: %s\n", fb->lcd_path);
-		fb->parameters.func_status = FWDT_DEVICE_NOT_FOUND;
 		goto err;
 	}
 
 	status = acpi_evaluate_object(lcd_device, "_BCM", &args, NULL);
 	if (!ACPI_SUCCESS(status)) {
 		pr_info("Failed to set brightness level!\n");
-		fb->parameters.func_status = FWDT_FAIL;
 		goto err;
 	}
 
-	fb->parameters.func_status = FWDT_SUCCESS;
  err:
 	return status;
 }
@@ -191,13 +185,11 @@ static int get_acpi_vga_br_levels(struct fwdt_brightness *fbl)
 	status = acpi_get_handle(NULL, fbl->lcd_path, &lcd_device);
 	if (!ACPI_SUCCESS(status)) {
 		pr_info("Failed to find acpi lcd device: %s\n", fbl->lcd_path);
-		fbl->parameters.func_status = FWDT_DEVICE_NOT_FOUND;
 		goto err;
 	}
 
 	if (!ACPI_SUCCESS(acpi_lcd_query_levels(lcd_device, &obj))) {
 		printk("Failed to query brightness levels\n");
-		fbl->parameters.func_status = FWDT_FAIL;
 		goto err;
 	}
 
@@ -209,7 +201,6 @@ static int get_acpi_vga_br_levels(struct fwdt_brightness *fbl)
 		fbl->levels[i] = (u32) o->integer.value;
 	}
 
-	fbl->parameters.func_status = FWDT_SUCCESS;
  err:
 	return status;
 }

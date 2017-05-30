@@ -65,7 +65,7 @@ ssize_t acpi_method_0_0_write(struct device *dev,
 	else
 		printk("Failed to execute %s\n", path);
 
-      err:
+ err:
 	return count;
 }
 
@@ -204,8 +204,6 @@ int handle_acpi_aml_cmd(fwdt_generic __user *fg)
 		goto err;
 		break;
 	}
-
-	fd.parameters.func_status = FWDT_SUCCESS;
 
 	if (unlikely(copy_to_user(fg, &fd, sizeof(struct fwdt_acpi_data))))
 		return -EFAULT;

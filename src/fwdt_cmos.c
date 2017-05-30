@@ -62,8 +62,6 @@ int handle_hardware_cmos_cmd(fwdt_generic __user *fg)
 		break;
 	}
 
-	fcd.parameters.func_status = FWDT_SUCCESS;
-
 	if (unlikely(copy_to_user(fg, &fcd, sizeof(struct fwdt_cmos_data))))
 		return -EFAULT;
 

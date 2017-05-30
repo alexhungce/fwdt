@@ -41,10 +41,7 @@ enum fwdt_hw_access_sub_cmd {
 };
 
 typedef struct {
-	union {
-		u16 func;
-		u16 func_status;
-	};
+	u16 func;
 	u16	reserved;
 } fwdt_parameter;
 

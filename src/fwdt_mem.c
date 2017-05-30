@@ -89,8 +89,6 @@ int handle_hardware_memory_cmd(fwdt_generic __user *fg)
 		break;
 	}
 
-	fmd.parameters.func_status = FWDT_SUCCESS;
-
 	if (unlikely(copy_to_user(fg, &fmd, sizeof(struct fwdt_mem_data))))
 		ret = -EFAULT;
 

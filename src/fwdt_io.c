@@ -98,8 +98,6 @@ int handle_hardware_io_cmd(fwdt_generic __user *fg)
 		break;
 	}
 
-	fid.parameters.func_status = FWDT_SUCCESS;
-
 	if (unlikely(copy_to_user(fg, &fid, sizeof(struct fwdt_io_data))))
 		return -EFAULT;
 
