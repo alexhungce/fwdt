@@ -57,6 +57,7 @@ static DEVICE_ATTR(acpi_arg0, S_IRUGO | S_IWUSR, acpi_arg0_read, acpi_arg0_write
 static DEVICE_ATTR(acpi_arg1, S_IRUGO | S_IWUSR, acpi_arg1_read, acpi_arg1_write);
 static DEVICE_ATTR(acpi_method_1_0, S_IRUGO | S_IWUSR, acpi_method_1_0_read, acpi_method_1_0_write);
 static DEVICE_ATTR(acpi_method_1_1, S_IRUGO | S_IWUSR, acpi_method_1_1_read, acpi_method_1_1_write);
+static DEVICE_ATTR(acpi_method_2_0, S_IRUGO | S_IWUSR, acpi_method_2_0_read, acpi_method_1_0_write);
 
 /* ACPI VGA */
 extern acpi_handle video_device;
@@ -96,6 +97,7 @@ static DEVICE_ATTR(msr, S_IRUGO | S_IWUSR, msr_read_data, msr_set_register);
 static struct attribute *fwdt_acpi_sysfs_entries[] = {
 	&dev_attr_acpi_arg0.attr,
 	&dev_attr_acpi_arg1.attr,
+	&dev_attr_acpi_method_2_0.attr,
 	&dev_attr_acpi_method_1_0.attr,
 	&dev_attr_acpi_method_1_1.attr,
 	&dev_attr_acpi_method_0_1.attr,

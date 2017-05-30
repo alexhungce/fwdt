@@ -197,6 +197,29 @@ ssize_t acpi_method_1_1_write(struct device *dev,
 	return count;
 }
 
+ssize_t acpi_method_2_0_read(struct device *dev,
+		struct device_attribute *attr, char *buf)
+{
+	acpi_status status;
+	unsigned long long output;
+	union acpi_object arg_objs[] = {
+		{ACPI_TYPE_INTEGER},
+		{ACPI_TYPE_INTEGER}
+	};
+	struct acpi_object_list args = { 2, arg_objs };
+
+	arg_objs[0].integer.value = acpi_arg0;
+	arg_objs[1].integer.value = acpi_arg1;
+
+	status = acpi_evaluate_integer(NULL, acpi_method_1_x, &args, &output);
+	if (ACPI_SUCCESS(status))
+		printk("Executed %s\n", acpi_method_1_x);
+	else
+		printk("Failed to execute %s\n", acpi_method_1_x);
+
+	return sprintf(buf, "0x%08x\n", ACPI_SUCCESS(status));
+}
+
 int handle_acpi_aml_cmd(fwdt_generic __user *fg)
 {
 	int ret = 0;
