@@ -131,17 +131,17 @@ ssize_t acpi_arg1_write(struct device *dev,
 	return count;
 }
 
-static char acpi_method_1_x[80];
+static char acpi_method_name[80];
 ssize_t acpi_method_1_0_read(struct device *dev,
 		struct device_attribute *attr, char *buf)
 {
 	acpi_status status;
 
-	status = acpi_execute_simple_method(NULL, acpi_method_1_x, acpi_arg0);
+	status = acpi_execute_simple_method(NULL, acpi_method_name, acpi_arg0);
 	if (ACPI_SUCCESS(status))
-		printk("Executed %s\n", acpi_method_1_x);
+		printk("Executed %s\n", acpi_method_name);
 	else
-		printk("Failed to execute %s\n", acpi_method_1_x);
+		printk("Failed to execute %s\n", acpi_method_name);
 
 	return sprintf(buf, "0x%08x\n", ACPI_SUCCESS(status));
 }
@@ -152,11 +152,11 @@ ssize_t acpi_method_name_write(struct device *dev,
 	acpi_handle device;
 	acpi_status status;
 
-	acpi_device_path(buf, acpi_method_1_x);
+	acpi_device_path(buf, acpi_method_name);
 
-	status = acpi_get_handle(NULL, acpi_method_1_x, &device);
+	status = acpi_get_handle(NULL, acpi_method_name, &device);
 	if (!ACPI_SUCCESS(status)) {
-		printk("Failed to find acpi method: %s\n", acpi_method_1_x);
+		printk("Failed to find acpi method: %s\n", acpi_method_name);
 	}
 
 	return count;
@@ -172,11 +172,11 @@ ssize_t acpi_method_1_1_read(struct device *dev,
 
 	arg0.integer.value = acpi_arg0;
 
-	status = acpi_evaluate_integer(NULL, acpi_method_1_x, &args, &output);
+	status = acpi_evaluate_integer(NULL, acpi_method_name, &args, &output);
 	if (ACPI_SUCCESS(status))
-		printk("Executed %s\n", acpi_method_1_x);
+		printk("Executed %s\n", acpi_method_name);
 	else
-		printk("Failed to execute %s\n", acpi_method_1_x);
+		printk("Failed to execute %s\n", acpi_method_name);
 
 	return sprintf(buf, "0x%08llx\n", output);
 }
@@ -195,11 +195,11 @@ ssize_t acpi_method_2_0_read(struct device *dev,
 	arg_objs[0].integer.value = acpi_arg0;
 	arg_objs[1].integer.value = acpi_arg1;
 
-	status = acpi_evaluate_integer(NULL, acpi_method_1_x, &args, &output);
+	status = acpi_evaluate_integer(NULL, acpi_method_name, &args, &output);
 	if (ACPI_SUCCESS(status))
-		printk("Executed %s\n", acpi_method_1_x);
+		printk("Executed %s\n", acpi_method_name);
 	else
-		printk("Failed to execute %s\n", acpi_method_1_x);
+		printk("Failed to execute %s\n", acpi_method_name);
 
 	return sprintf(buf, "0x%08x\n", ACPI_SUCCESS(status));
 }
