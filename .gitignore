@@ -11,3 +11,4 @@ src/fwdt.mod.c
 src/*.o
 src/modules.order
 *.swp
+.gitignore
