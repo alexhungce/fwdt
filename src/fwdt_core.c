@@ -91,6 +91,24 @@ static DEVICE_ATTR(cmos, S_IRUGO | S_IWUSR, cmos_read_data, cmos_write_addr);
 /* MSR */
 static DEVICE_ATTR(msr, S_IRUGO | S_IWUSR, msr_read_data, msr_set_register);
 
+#ifdef CONFIG_ACPI
+static struct attribute *fwdt_acpi_sysfs_entries[] = {
+	&dev_attr_acpi_arg0.attr,
+	&dev_attr_acpi_method_1_0.attr,
+	&dev_attr_acpi_method_1_1.attr,
+	&dev_attr_acpi_method_0_1.attr,
+	&dev_attr_acpi_method_0_0.attr,
+	&dev_attr_video_device.attr,
+	&dev_attr_video_brightness.attr,
+	NULL,
+};
+
+static struct attribute_group acpi_attr_group = {
+	.name   = NULL,         /* put in device directory */
+	.attrs  = fwdt_acpi_sysfs_entries,
+};
+#endif
+
 static long fwdt_runtime_ioctl(struct file *file, unsigned int cmd,
 							unsigned long arg)
 {
@@ -158,13 +176,7 @@ static struct miscdevice fwdt_runtime_dev = {
 static void cleanup_sysfs(struct platform_device *device)
 {
 #ifdef CONFIG_ACPI
-	device_remove_file(&device->dev, &dev_attr_acpi_arg0);
-	device_remove_file(&device->dev, &dev_attr_acpi_method_1_0);
-	device_remove_file(&device->dev, &dev_attr_acpi_method_1_1);
-	device_remove_file(&device->dev, &dev_attr_acpi_method_0_1);
-	device_remove_file(&device->dev, &dev_attr_acpi_method_0_0);
-	device_remove_file(&device->dev, &dev_attr_video_device);
-	device_remove_file(&device->dev, &dev_attr_video_brightness);
+	sysfs_remove_group(&device->dev.kobj, &acpi_attr_group);
 
 	if (video_device)
 		video_device = NULL;
@@ -196,25 +208,7 @@ static int fwdt_setup(struct platform_device *device)
 #ifdef CONFIG_ACPI
 	acpi_status status;
 
-	err = device_create_file(&device->dev, &dev_attr_acpi_arg0);
-	if (err)
-		goto add_sysfs_error;
-	err = device_create_file(&device->dev, &dev_attr_acpi_method_1_0);
-	if (err)
-		goto add_sysfs_error;
-	err = device_create_file(&device->dev, &dev_attr_acpi_method_1_1);
-	if (err)
-		goto add_sysfs_error;
-	err = device_create_file(&device->dev, &dev_attr_acpi_method_0_1);
-	if (err)
-		goto add_sysfs_error;
-	err = device_create_file(&device->dev, &dev_attr_acpi_method_0_0);
-	if (err)
-		goto add_sysfs_error;
-	err = device_create_file(&device->dev, &dev_attr_video_device);
-	if (err)
-		goto add_sysfs_error;
-	err = device_create_file(&device->dev, &dev_attr_video_brightness);
+	err = sysfs_create_group(&device->dev.kobj, &acpi_attr_group);
 	if (err)
 		goto add_sysfs_error;
 
