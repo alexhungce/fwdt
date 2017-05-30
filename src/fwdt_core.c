@@ -144,6 +144,18 @@ static struct attribute_group io_attr_group = {
 	.attrs  = fwdt_io_sysfs_entries,
 };
 
+static struct attribute *fwdt_pci_sysfs_entries[] = {
+	&dev_attr_pci_id.attr,
+	&dev_attr_pci_reg.attr,
+	&dev_attr_pci_data.attr,
+	NULL,
+};
+
+static struct attribute_group pci_attr_group = {
+	.name   = NULL,         /* put in device directory */
+	.attrs  = fwdt_pci_sysfs_entries,
+};
+
 static long fwdt_runtime_ioctl(struct file *file, unsigned int cmd,
 							unsigned long arg)
 {
@@ -224,9 +236,7 @@ static void cleanup_sysfs(struct platform_device *device)
 
 	sysfs_remove_group(&device->dev.kobj, &memory_attr_group);
 	sysfs_remove_group(&device->dev.kobj, &io_attr_group);
-	device_remove_file(&device->dev, &dev_attr_pci_id);
-	device_remove_file(&device->dev, &dev_attr_pci_reg);
-	device_remove_file(&device->dev, &dev_attr_pci_data);
+	sysfs_remove_group(&device->dev.kobj, &pci_attr_group);
 	device_remove_file(&device->dev, &dev_attr_cmos);
 	device_remove_file(&device->dev, &dev_attr_msr);
 }
@@ -259,13 +269,7 @@ static int fwdt_setup(struct platform_device *device)
 	err = sysfs_create_group(&device->dev.kobj, &io_attr_group);
 	if (err)
 		goto add_sysfs_error;
-	err = device_create_file(&device->dev, &dev_attr_pci_id);
-	if (err)
-		goto add_sysfs_error;
-	err = device_create_file(&device->dev, &dev_attr_pci_reg);
-	if (err)
-		goto add_sysfs_error;
-	err = device_create_file(&device->dev, &dev_attr_pci_data);
+	err = sysfs_create_group(&device->dev.kobj, &pci_attr_group);
 	if (err)
 		goto add_sysfs_error;
 	err = device_create_file(&device->dev, &dev_attr_cmos);
