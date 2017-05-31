@@ -92,6 +92,8 @@ typedef struct {
 	u8 offset;
 } Pci_dev;
 
+#ifdef CONFIG_PCI
+
 ssize_t pci_read_data(struct device *dev, struct device_attribute *attr, char *buf);
 ssize_t pci_write_data(struct device *dev, struct device_attribute *attr, const char *buf, size_t count);
 ssize_t pci_read_offset(struct device *dev, struct device_attribute *attr, char *buf);
@@ -99,5 +101,6 @@ ssize_t pci_write_offset(struct device *dev, struct device_attribute *attr, cons
 ssize_t pci_write_ids(struct device *dev, struct device_attribute *attr, const char *buf, size_t count);
 ssize_t pci_read_ids(struct device *dev, struct device_attribute *attr, char *buf);;
 
+#endif
 
 #endif

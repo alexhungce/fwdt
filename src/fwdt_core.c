@@ -92,11 +92,13 @@ static DEVICE_ATTR(msr, S_IRUGO | S_IWUSR, msr_read_data, msr_set_register);
 
 #endif
 
+#ifdef CONFIG_PCI
 /* PCI */
 extern Pci_dev pci_dev;
 static DEVICE_ATTR(pci_data, S_IRUGO | S_IWUSR, pci_read_data, pci_write_data);
 static DEVICE_ATTR(pci_reg, S_IRUGO | S_IWUSR, pci_read_offset, pci_write_offset);
 static DEVICE_ATTR(pci_id, S_IRUGO | S_IWUSR, pci_read_ids, pci_write_ids);
+#endif
 
 #ifdef CONFIG_ACPI
 static struct attribute *fwdt_acpi_sysfs_entries[] = {
@@ -158,6 +160,8 @@ static struct attribute_group io_attr_group = {
 
 #endif
 
+#ifdef CONFIG_PCI
+
 static struct attribute *fwdt_pci_sysfs_entries[] = {
 	&dev_attr_pci_id.attr,
 	&dev_attr_pci_reg.attr,
@@ -169,6 +173,8 @@ static struct attribute_group pci_attr_group = {
 	.name   = NULL,         /* put in device directory */
 	.attrs  = fwdt_pci_sysfs_entries,
 };
+
+#endif
 
 static long fwdt_runtime_ioctl(struct file *file, unsigned int cmd,
 							unsigned long arg)
@@ -257,7 +263,9 @@ static void cleanup_sysfs(struct platform_device *device)
 	device_remove_file(&device->dev, &dev_attr_msr);
 #endif
 
+#ifdef CONFIG_PCI
 	sysfs_remove_group(&device->dev.kobj, &pci_attr_group);
+#endif
 }
 
 static int fwdt_setup(struct platform_device *device)
@@ -296,9 +304,12 @@ static int fwdt_setup(struct platform_device *device)
 	if (err)
 		goto add_sysfs_error;
 #endif
+
+#ifdef CONFIG_PCI
 	err = sysfs_create_group(&device->dev.kobj, &pci_attr_group);
 	if (err)
 		goto add_sysfs_error;
+#endif
 
 	return 0;
 
@@ -339,7 +350,9 @@ static int __init fwdt_init(void)
 
 	sema_init(&fwdt_lock, 1);
 
+#ifdef CONFIG_PCI
 	memset(&pci_dev, 0xFF, sizeof(pci_dev));
+#endif
 
 	return 0;
 

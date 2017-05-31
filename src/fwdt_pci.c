@@ -21,6 +21,8 @@
 #include <linux/semaphore.h>
 #include "fwdt_lib.h"
 
+#ifdef CONFIG_PCI
+
 Pci_dev pci_dev;
 
 ssize_t pci_read_data(struct device *dev,
@@ -97,3 +99,5 @@ ssize_t pci_write_ids(struct device *dev,
 
 	return count;
 }
+
+#endif
