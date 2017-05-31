@@ -84,7 +84,7 @@ int handle_hardware_memory_cmd(fwdt_generic __user *fg)
 		*mem = fmd.mem_data;
 		break;
 	default:
-		ret = -ENOTTY;
+		ret = -EINVAL;
 		goto err;
 		break;
 	}

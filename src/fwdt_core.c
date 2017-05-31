@@ -188,7 +188,7 @@ static long fwdt_runtime_ioctl(struct file *file, unsigned int cmd,
 		break;
 
 	default:
-		err = -ENOTTY;
+		err = -EINVAL;
 		break;
 	}
 

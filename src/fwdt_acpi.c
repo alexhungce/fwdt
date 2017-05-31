@@ -200,7 +200,7 @@ int handle_acpi_aml_cmd(fwdt_generic __user *fg)
 		// TODO evaluate acpi object
 		break;
 	default:
-		ret = -ENOTTY;
+		ret = -EINVAL;
 		goto err;
 		break;
 	}

@@ -57,7 +57,7 @@ int handle_hardware_cmos_cmd(fwdt_generic __user *fg)
 		fcd.cmos_data = CMOS_READ(fcd.cmos_address);
 		break;
 	default:
-		ret = -ENOTTY;
+		ret = -EINVAL;
 		goto err;
 		break;
 	}

@@ -224,7 +224,7 @@ int handle_acpi_vga_cmd(fwdt_generic __user *fg)
 		break;
 */
 	default:
-		err = -ENOTTY;
+		err = -EINVAL;
 		break;
 	}
 

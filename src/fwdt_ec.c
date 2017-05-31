@@ -123,7 +123,7 @@ int handle_acpi_ec_cmd(fwdt_generic __user *fg)
 			return -EFAULT;
 		break;
 	default:
-		err = -ENOTTY;
+		err = -EINVAL;
 		break;
 	}
 
