@@ -111,13 +111,11 @@ int handle_acpi_ec_cmd(fwdt_generic __user *fg)
 		if (ACPI_SUCCESS(status))
 			err = FWDT_SUCCESS;
 		else
-			err = FWDT_DEVICE_NOT_FOUND;
+			err = -ENODEV;
 		break;
 	case CHECK_EC_DEVICE:
 		if (ec_device == NULL)
-			err = FWDT_SUCCESS;
-		else
-			err = FWDT_SUCCESS;
+			err = -ENODEV;
 
 		if (unlikely(copy_to_user(fec, &ecd, sizeof(struct fwdt_ec_data))))
 			return -EFAULT;
