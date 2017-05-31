@@ -22,6 +22,8 @@
 #include <linux/semaphore.h>
 #include "fwdt_lib.h"
 
+#ifdef CONFIG_X86
+
 static int msr_register;
 ssize_t msr_read_data(struct device *dev,
 	struct device_attribute *attr, char *buf)
@@ -39,3 +41,5 @@ ssize_t msr_set_register(struct device *dev,
 		return -EINVAL;
 	return count;
 }
+
+#endif

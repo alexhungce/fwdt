@@ -22,6 +22,8 @@
 #include <linux/semaphore.h>
 #include "fwdt_lib.h"
 
+#ifdef CONFIG_X86
+
 static u16 io_addr;
 ssize_t io_read_address(struct device *dev,
 	struct device_attribute *attr, char *buf)
@@ -104,3 +106,5 @@ int handle_hardware_io_cmd(fwdt_generic __user *fg)
  err:
 	return ret;
 }
+
+#endif

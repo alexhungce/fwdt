@@ -22,6 +22,8 @@
 #include <linux/uaccess.h>
 #include "fwdt_lib.h"
 
+#ifdef CONFIG_X86
+
 static int cmos_offset;
 ssize_t cmos_read_data(struct device *dev,
 	struct device_attribute *attr, char *buf)
@@ -68,3 +70,5 @@ int handle_hardware_cmos_cmd(fwdt_generic __user *fg)
  err:
 	return ret;
 }
+
+#endif

@@ -63,6 +63,8 @@ ssize_t mem_read_data(struct device *dev, struct device_attribute *attr, char *b
 ssize_t mem_write_data(struct device *dev, struct device_attribute *attr, const char *buf, size_t count);
 int handle_hardware_memory_cmd(fwdt_generic __user *fg);
 
+#ifdef CONFIG_X86
+
 /* I/O functions */
 ssize_t io_read_address(struct device *dev, struct device_attribute *attr, char *buf);
 ssize_t io_write_address(struct device *dev, struct device_attribute *attr, const char *buf, size_t count);
@@ -71,6 +73,17 @@ ssize_t iow_write_data(struct device *dev, struct device_attribute *attr, const 
 ssize_t iob_read_data(struct device *dev, struct device_attribute *attr, char *buf);
 ssize_t iob_write_data(struct device *dev, struct device_attribute *attr, const char *buf, size_t count);
 int handle_hardware_io_cmd(fwdt_generic __user *fg);
+
+/* CMOS functions */
+ssize_t cmos_read_data(struct device *dev, struct device_attribute *attr, char *buf);
+ssize_t cmos_write_addr(struct device *dev, struct device_attribute *attr, const char *buf, size_t count);
+int handle_hardware_cmos_cmd(fwdt_generic __user *fg);
+
+/* MSR functions */
+ssize_t msr_read_data(struct device *dev, struct device_attribute *attr, char *buf);
+ssize_t msr_set_register(struct device *dev, struct device_attribute *attr, const char *buf, size_t count);
+
+#endif
 
 /* PCI functions */
 typedef struct {
@@ -86,13 +99,5 @@ ssize_t pci_write_offset(struct device *dev, struct device_attribute *attr, cons
 ssize_t pci_write_ids(struct device *dev, struct device_attribute *attr, const char *buf, size_t count);
 ssize_t pci_read_ids(struct device *dev, struct device_attribute *attr, char *buf);;
 
-/* CMOS functions */
-ssize_t cmos_read_data(struct device *dev, struct device_attribute *attr, char *buf);
-ssize_t cmos_write_addr(struct device *dev, struct device_attribute *attr, const char *buf, size_t count);
-int handle_hardware_cmos_cmd(fwdt_generic __user *fg);
-
-/* MSR functions */
-ssize_t msr_read_data(struct device *dev, struct device_attribute *attr, char *buf);
-ssize_t msr_set_register(struct device *dev, struct device_attribute *attr, const char *buf, size_t count);
 
 #endif

@@ -77,22 +77,26 @@ static DEVICE_ATTR(ec_qmethod, S_IWUSR, NULL, ec_exec_qmethod);
 static DEVICE_ATTR(mem_address, S_IRUGO | S_IWUSR, mem_read_address, mem_write_address);
 static DEVICE_ATTR(mem_data, S_IRUGO | S_IWUSR, mem_read_data, mem_write_data);
 
+#ifdef CONFIG_X86
+
 /* I/O */
 static DEVICE_ATTR(io_address, S_IRUGO | S_IWUSR, io_read_address, io_write_address);
 static DEVICE_ATTR(iow_data, S_IRUGO | S_IWUSR, iow_read_data, iow_write_data);
 static DEVICE_ATTR(iob_data, S_IRUGO | S_IWUSR, iob_read_data, iob_write_data);
-
-/* PCI */
-extern Pci_dev pci_dev;
-static DEVICE_ATTR(pci_data, S_IRUGO | S_IWUSR, pci_read_data, pci_write_data);
-static DEVICE_ATTR(pci_reg, S_IRUGO | S_IWUSR, pci_read_offset, pci_write_offset);
-static DEVICE_ATTR(pci_id, S_IRUGO | S_IWUSR, pci_read_ids, pci_write_ids);
 
 /* CMOS */
 static DEVICE_ATTR(cmos, S_IRUGO | S_IWUSR, cmos_read_data, cmos_write_addr);
 
 /* MSR */
 static DEVICE_ATTR(msr, S_IRUGO | S_IWUSR, msr_read_data, msr_set_register);
+
+#endif
+
+/* PCI */
+extern Pci_dev pci_dev;
+static DEVICE_ATTR(pci_data, S_IRUGO | S_IWUSR, pci_read_data, pci_write_data);
+static DEVICE_ATTR(pci_reg, S_IRUGO | S_IWUSR, pci_read_offset, pci_write_offset);
+static DEVICE_ATTR(pci_id, S_IRUGO | S_IWUSR, pci_read_ids, pci_write_ids);
 
 #ifdef CONFIG_ACPI
 static struct attribute *fwdt_acpi_sysfs_entries[] = {
@@ -138,6 +142,8 @@ static struct attribute_group memory_attr_group = {
 	.attrs  = fwdt_memory_sysfs_entries,
 };
 
+#ifdef CONFIG_X86
+
 static struct attribute *fwdt_io_sysfs_entries[] = {
 	&dev_attr_io_address.attr,
 	&dev_attr_iow_data.attr,
@@ -149,6 +155,8 @@ static struct attribute_group io_attr_group = {
 	.name   = NULL,         /* put in device directory */
 	.attrs  = fwdt_io_sysfs_entries,
 };
+
+#endif
 
 static struct attribute *fwdt_pci_sysfs_entries[] = {
 	&dev_attr_pci_id.attr,
@@ -179,16 +187,17 @@ static long fwdt_runtime_ioctl(struct file *file, unsigned int cmd,
 		err = handle_acpi_aml_cmd((fwdt_generic __user *) arg);
 		break;
 #endif
+#ifdef CONFIG_X86
 	case FWDT_HW_ACCESS_IO_CMD:
 		err = handle_hardware_io_cmd((fwdt_generic __user *) arg);
-		break;
-	case FWDT_HW_ACCESS_MEMORY_CMD:
-		err = handle_hardware_memory_cmd((fwdt_generic __user *) arg);
 		break;
 	case FWDT_HW_ACCESS_CMOS_CMD:
 		err = handle_hardware_cmos_cmd((fwdt_generic __user *) arg);
 		break;
-
+#endif
+	case FWDT_HW_ACCESS_MEMORY_CMD:
+		err = handle_hardware_memory_cmd((fwdt_generic __user *) arg);
+		break;
 	default:
 		err = -EINVAL;
 		break;
@@ -241,10 +250,14 @@ static void cleanup_sysfs(struct platform_device *device)
 #endif
 
 	sysfs_remove_group(&device->dev.kobj, &memory_attr_group);
+
+#ifdef CONFIG_X86
 	sysfs_remove_group(&device->dev.kobj, &io_attr_group);
-	sysfs_remove_group(&device->dev.kobj, &pci_attr_group);
 	device_remove_file(&device->dev, &dev_attr_cmos);
 	device_remove_file(&device->dev, &dev_attr_msr);
+#endif
+
+	sysfs_remove_group(&device->dev.kobj, &pci_attr_group);
 }
 
 static int fwdt_setup(struct platform_device *device)
@@ -272,16 +285,18 @@ static int fwdt_setup(struct platform_device *device)
 	err = sysfs_create_group(&device->dev.kobj, &memory_attr_group);
 	if (err)
 		goto add_sysfs_error;
+#ifdef CONFIG_X86
 	err = sysfs_create_group(&device->dev.kobj, &io_attr_group);
-	if (err)
-		goto add_sysfs_error;
-	err = sysfs_create_group(&device->dev.kobj, &pci_attr_group);
 	if (err)
 		goto add_sysfs_error;
 	err = device_create_file(&device->dev, &dev_attr_cmos);
 	if (err)
 		goto add_sysfs_error;
 	err = device_create_file(&device->dev, &dev_attr_msr);
+	if (err)
+		goto add_sysfs_error;
+#endif
+	err = sysfs_create_group(&device->dev.kobj, &pci_attr_group);
 	if (err)
 		goto add_sysfs_error;
 
