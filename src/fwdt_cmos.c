@@ -16,17 +16,17 @@
 
 #define pr_fmt(fmt) "fwdt: " fmt
 
-#include <linux/module.h>
+#include "fwdt_lib.h"
 #include <asm/time.h>
+#include <linux/module.h>
 #include <linux/semaphore.h>
 #include <linux/uaccess.h>
-#include "fwdt_lib.h"
 
 #ifdef CONFIG_X86
 
 static int cmos_offset;
-ssize_t cmos_read_data(struct device *dev,
-	struct device_attribute *attr, char *buf)
+ssize_t cmos_read_data(struct device *dev, struct device_attribute *attr,
+		       char *buf)
 {
 	if (cmos_offset > 0xFF)
 		return -EINVAL;
@@ -34,8 +34,8 @@ ssize_t cmos_read_data(struct device *dev,
 	return sprintf(buf, "0x%02x\n", CMOS_READ(cmos_offset));
 }
 
-ssize_t cmos_write_addr(struct device *dev,
-	struct device_attribute *attr, const char *buf, size_t count)
+ssize_t cmos_write_addr(struct device *dev, struct device_attribute *attr,
+			const char *buf, size_t count)
 {
 	if (kstrtoint(buf, 16, &cmos_offset))
 		return -EINVAL;
@@ -67,7 +67,7 @@ int handle_hardware_cmos_cmd(fwdt_generic __user *fg)
 	if (unlikely(copy_to_user(fg, &fcd, sizeof(struct fwdt_cmos_data))))
 		return -EFAULT;
 
- err:
+err:
 	return ret;
 }
 

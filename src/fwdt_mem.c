@@ -16,21 +16,21 @@
 
 #define pr_fmt(fmt) "fwdt: " fmt
 
+#include "fwdt_lib.h"
 #include <linux/kernel.h>
 #include <linux/platform_device.h>
-#include <linux/uaccess.h>
 #include <linux/semaphore.h>
-#include "fwdt_lib.h"
+#include <linux/uaccess.h>
 
 static u32 mem_addr;
-ssize_t mem_read_address(struct device *dev,
-	struct device_attribute *attr, char *buf)
+ssize_t mem_read_address(struct device *dev, struct device_attribute *attr,
+			 char *buf)
 {
 	return sprintf(buf, "0x%08x\n", mem_addr);
 }
 
-ssize_t mem_write_address(struct device *dev,
-	struct device_attribute *attr, const char *buf, size_t count)
+ssize_t mem_write_address(struct device *dev, struct device_attribute *attr,
+			  const char *buf, size_t count)
 {
 	mem_addr = simple_strtoul(buf, NULL, 16);
 
@@ -38,7 +38,7 @@ ssize_t mem_write_address(struct device *dev,
 }
 
 ssize_t mem_read_data(struct device *dev, struct device_attribute *attr,
-			char *buf)
+		      char *buf)
 {
 	volatile u32 *mem;
 	u32 data;
@@ -51,7 +51,7 @@ ssize_t mem_read_data(struct device *dev, struct device_attribute *attr,
 }
 
 ssize_t mem_write_data(struct device *dev, struct device_attribute *attr,
-			const char *buf, size_t count)
+		       const char *buf, size_t count)
 {
 	volatile u32 *mem;
 	u32 data;
@@ -92,7 +92,7 @@ int handle_hardware_memory_cmd(fwdt_generic __user *fg)
 	if (unlikely(copy_to_user(fg, &fmd, sizeof(struct fwdt_mem_data))))
 		ret = -EFAULT;
 
- err:
+err:
 	iounmap(mem);
 	return ret;
 }

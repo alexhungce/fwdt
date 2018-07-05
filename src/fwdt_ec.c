@@ -16,18 +16,18 @@
 
 #define pr_fmt(fmt) "fwdt: " fmt
 
-#include <linux/module.h>
+#include "fwdt_lib.h"
 #include <linux/acpi.h>
+#include <linux/module.h>
 #include <linux/semaphore.h>
 #include <linux/uaccess.h>
-#include "fwdt_lib.h"
 
 #ifdef CONFIG_ACPI
 
 acpi_handle ec_device = NULL;
 static int ec_offset;
-ssize_t ec_read_data(struct device *dev,
-	struct device_attribute *attr, char *buf)
+ssize_t ec_read_data(struct device *dev, struct device_attribute *attr,
+		     char *buf)
 {
 	int ret;
 	u8 data;
@@ -36,11 +36,12 @@ ssize_t ec_read_data(struct device *dev,
 	if (ret)
 		return -EINVAL;
 
-	return sprintf(buf, "%x\n", data);;
+	return sprintf(buf, "%x\n", data);
+	;
 }
 
-ssize_t ec_write_data(struct device *dev,
-	struct device_attribute *attr, const char *buf, size_t count)
+ssize_t ec_write_data(struct device *dev, struct device_attribute *attr,
+		      const char *buf, size_t count)
 {
 	int ret;
 	u8 data;
@@ -53,21 +54,22 @@ ssize_t ec_write_data(struct device *dev,
 	return count;
 }
 
-ssize_t ec_read_addr(struct device *dev,
-	struct device_attribute *attr, char *buf)
+ssize_t ec_read_addr(struct device *dev, struct device_attribute *attr,
+		     char *buf)
 {
-	return sprintf(buf, "0x%02x\n", ec_offset);;
+	return sprintf(buf, "0x%02x\n", ec_offset);
+	;
 }
 
-ssize_t ec_write_addr(struct device *dev,
-	struct device_attribute *attr, const char *buf, size_t count)
+ssize_t ec_write_addr(struct device *dev, struct device_attribute *attr,
+		      const char *buf, size_t count)
 {
 	ec_offset = simple_strtoul(buf, NULL, 16);
 	return count;
 }
 
-ssize_t ec_exec_qmethod(struct device *dev,
-	struct device_attribute *attr, const char *buf, size_t count)
+ssize_t ec_exec_qmethod(struct device *dev, struct device_attribute *attr,
+			const char *buf, size_t count)
 {
 	acpi_status status;
 	u8 data;
@@ -88,7 +90,7 @@ ssize_t ec_exec_qmethod(struct device *dev,
 int handle_acpi_ec_cmd(fwdt_generic __user *fg)
 {
 	int err;
-	struct fwdt_ec_data *fec = (struct fwdt_ec_data*) fg;
+	struct fwdt_ec_data *fec = (struct fwdt_ec_data *)fg;
 	struct fwdt_ec_data ecd;
 	char q_num[5];
 	acpi_status status;
@@ -99,7 +101,8 @@ int handle_acpi_ec_cmd(fwdt_generic __user *fg)
 	switch (fg->parameters.func) {
 	case GET_EC_REGISTER:
 		err = ec_read(ecd.address, &ecd.data);
-		if (unlikely(copy_to_user(fec, &ecd, sizeof(struct fwdt_ec_data))))
+		if (unlikely(
+			copy_to_user(fec, &ecd, sizeof(struct fwdt_ec_data))))
 			return -EFAULT;
 		break;
 	case SET_EC_REGISTER:
@@ -117,7 +120,8 @@ int handle_acpi_ec_cmd(fwdt_generic __user *fg)
 		if (ec_device == NULL)
 			err = -ENODEV;
 
-		if (unlikely(copy_to_user(fec, &ecd, sizeof(struct fwdt_ec_data))))
+		if (unlikely(
+			copy_to_user(fec, &ecd, sizeof(struct fwdt_ec_data))))
 			return -EFAULT;
 		break;
 	default:

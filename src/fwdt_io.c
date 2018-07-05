@@ -16,23 +16,23 @@
 
 #define pr_fmt(fmt) "fwdt: " fmt
 
+#include "fwdt_lib.h"
 #include <linux/kernel.h>
 #include <linux/platform_device.h>
-#include <linux/uaccess.h>
 #include <linux/semaphore.h>
-#include "fwdt_lib.h"
+#include <linux/uaccess.h>
 
 #ifdef CONFIG_X86
 
 static u16 io_addr;
-ssize_t io_read_address(struct device *dev,
-	struct device_attribute *attr, char *buf)
+ssize_t io_read_address(struct device *dev, struct device_attribute *attr,
+			char *buf)
 {
 	return sprintf(buf, "0x%04x\n", io_addr);
 }
 
-ssize_t io_write_address(struct device *dev,
-	struct device_attribute *attr, const char *buf, size_t count)
+ssize_t io_write_address(struct device *dev, struct device_attribute *attr,
+			 const char *buf, size_t count)
 {
 	io_addr = simple_strtoul(buf, NULL, 16) & 0xFFFF;
 
@@ -40,13 +40,13 @@ ssize_t io_write_address(struct device *dev,
 }
 
 ssize_t iow_read_data(struct device *dev, struct device_attribute *attr,
-			char *buf)
+		      char *buf)
 {
 	return sprintf(buf, "0x%04x\n", inw(io_addr));
 }
 
 ssize_t iow_write_data(struct device *dev, struct device_attribute *attr,
-			const char *buf, size_t count)
+		       const char *buf, size_t count)
 {
 	u16 data;
 
@@ -57,13 +57,13 @@ ssize_t iow_write_data(struct device *dev, struct device_attribute *attr,
 }
 
 ssize_t iob_read_data(struct device *dev, struct device_attribute *attr,
-			char *buf)
+		      char *buf)
 {
 	return sprintf(buf, "0x%02x\n", inb(io_addr));
 }
 
 ssize_t iob_write_data(struct device *dev, struct device_attribute *attr,
-			const char *buf, size_t count)
+		       const char *buf, size_t count)
 {
 	u8 data;
 
@@ -103,7 +103,7 @@ int handle_hardware_io_cmd(fwdt_generic __user *fg)
 	if (unlikely(copy_to_user(fg, &fid, sizeof(struct fwdt_io_data))))
 		return -EFAULT;
 
- err:
+err:
 	return ret;
 }
 

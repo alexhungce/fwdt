@@ -16,18 +16,18 @@
 
 #define pr_fmt(fmt) "fwdt: " fmt
 
+#include "fwdt_lib.h"
+#include <linux/acpi.h>
 #include <linux/kernel.h>
 #include <linux/platform_device.h>
-#include <linux/acpi.h>
 #include <linux/semaphore.h>
-#include "fwdt_lib.h"
 
 #ifdef CONFIG_ACPI
 
 int acpi_lcd_query_levels(acpi_handle *device, union acpi_object **levels)
 {
 	int status;
-	struct acpi_buffer buffer = { ACPI_ALLOCATE_BUFFER, NULL };
+	struct acpi_buffer buffer = {ACPI_ALLOCATE_BUFFER, NULL};
 	union acpi_object *obj;
 
 	*levels = NULL;
@@ -45,14 +45,15 @@ int acpi_lcd_query_levels(acpi_handle *device, union acpi_object **levels)
 	*levels = obj;
 	return 0;
 
- err:
+err:
 	kfree(buffer.pointer);
 	return status;
 }
 
 acpi_handle video_device;
 ssize_t acpi_video_write_device(struct device *dev,
-	struct device_attribute *attr, const char *buf, size_t count)
+				struct device_attribute *attr, const char *buf,
+				size_t count)
 {
 	acpi_status status;
 	char device_path[255];
@@ -69,7 +70,7 @@ ssize_t acpi_video_write_device(struct device *dev,
 }
 
 ssize_t acpi_video_read_brightness(struct device *dev,
-	struct device_attribute *attr, char *buf)
+				   struct device_attribute *attr, char *buf)
 {
 	acpi_status status;
 	unsigned long long bqc_level;
@@ -94,23 +95,24 @@ ssize_t acpi_video_read_brightness(struct device *dev,
 	}
 
 	for (i = 0; i < obj->package.count; i++) {
-		o =  (union acpi_object *) &obj->package.elements[i];
+		o = (union acpi_object *)&obj->package.elements[i];
 		if (unlikely(o->type != ACPI_TYPE_INTEGER))
 			continue;
-		printk("Brightness[%d] = %d\n", i, (u32) o->integer.value);
+		printk("Brightness[%d] = %d\n", i, (u32)o->integer.value);
 	}
 
- no_bcl:
+no_bcl:
 
 	return sprintf(buf, "%lld\n", bqc_level);
 }
 
 ssize_t acpi_video_write_brightness(struct device *dev,
-	struct device_attribute *attr, const char *buf, size_t count)
+				    struct device_attribute *attr,
+				    const char *buf, size_t count)
 {
 	acpi_status status;
-	union acpi_object arg0 = { ACPI_TYPE_INTEGER };
-	struct acpi_object_list args = { 1, &arg0 };
+	union acpi_object arg0 = {ACPI_TYPE_INTEGER};
+	struct acpi_object_list args = {1, &arg0};
 
 	if (!video_device) {
 		printk("acpi_video device is not specified!\n");
@@ -145,7 +147,7 @@ static int get_acpi_vga_brightness(struct fwdt_brightness *fb)
 	}
 
 	fb->brightness_level = bqc_level;
- err:
+err:
 	return status;
 }
 
@@ -154,8 +156,8 @@ static int set_acpi_vga_brightness(struct fwdt_brightness *fb)
 	int status;
 	acpi_handle lcd_device;
 
-	union acpi_object arg0 = { ACPI_TYPE_INTEGER };
-	struct acpi_object_list args = { 1, &arg0 };
+	union acpi_object arg0 = {ACPI_TYPE_INTEGER};
+	struct acpi_object_list args = {1, &arg0};
 
 	arg0.integer.value = fb->brightness_level;
 
@@ -171,7 +173,7 @@ static int set_acpi_vga_brightness(struct fwdt_brightness *fb)
 		goto err;
 	}
 
- err:
+err:
 	return status;
 }
 
@@ -195,13 +197,13 @@ static int get_acpi_vga_br_levels(struct fwdt_brightness *fbl)
 
 	fbl->num_of_levels = obj->package.count;
 	for (i = 0; i < obj->package.count; i++) {
-		o =  (union acpi_object *) &obj->package.elements[i];
+		o = (union acpi_object *)&obj->package.elements[i];
 		if (unlikely(o->type != ACPI_TYPE_INTEGER))
 			continue;
-		fbl->levels[i] = (u32) o->integer.value;
+		fbl->levels[i] = (u32)o->integer.value;
 	}
 
- err:
+err:
 	return status;
 }
 
@@ -211,18 +213,18 @@ int handle_acpi_vga_cmd(fwdt_generic __user *fg)
 
 	switch (fg->parameters.func) {
 	case GET_BRIGHTNESS:
-		err = get_acpi_vga_brightness((struct fwdt_brightness*) fg);
+		err = get_acpi_vga_brightness((struct fwdt_brightness *)fg);
 		break;
 	case SET_BRIGHTNESS:
-		err = set_acpi_vga_brightness((struct fwdt_brightness*) fg);
+		err = set_acpi_vga_brightness((struct fwdt_brightness *)fg);
 		break;
 	case GET_BRIGHTNESS_LV:
-		err = get_acpi_vga_br_levels((struct fwdt_brightness*) fg);
+		err = get_acpi_vga_br_levels((struct fwdt_brightness *)fg);
 		break;
-/*
-	case GET_VIDEO_DEVICE:
-		break;
-*/
+	/*
+		case GET_VIDEO_DEVICE:
+			break;
+	*/
 	default:
 		err = -EINVAL;
 		break;

@@ -16,18 +16,18 @@
 
 #define pr_fmt(fmt) "fwdt: " fmt
 
+#include "fwdt_lib.h"
+#include <acpi/acpi_bus.h>
+#include <linux/acpi.h>
 #include <linux/kernel.h>
 #include <linux/platform_device.h>
-#include <linux/uaccess.h>
-#include <linux/acpi.h>
-#include <acpi/acpi_bus.h>
 #include <linux/semaphore.h>
-#include "fwdt_lib.h"
+#include <linux/uaccess.h>
 
 #ifdef CONFIG_ACPI
 
-acpi_status acpi_handle_locate_callback(acpi_handle handle,
-			u32 level, void *context, void **return_value)
+acpi_status acpi_handle_locate_callback(acpi_handle handle, u32 level,
+					void *context, void **return_value)
 {
 	*(acpi_handle *)return_value = handle;
 
@@ -37,15 +37,15 @@ acpi_status acpi_handle_locate_callback(acpi_handle handle,
 void acpi_device_path(const char *buf, char *path)
 {
 	path[0] = '\\';
-	if (strlen(buf) < 80)  {
+	if (strlen(buf) < 80) {
 		strncpy(path + 1, buf, strlen(buf));
 		path[strlen(buf)] = 0;
 	} else
 		path[1] = 0;
 }
 
-ssize_t acpi_method_0_0_write(struct device *dev,
-	struct device_attribute *attr, const char *buf, size_t count)
+ssize_t acpi_method_0_0_write(struct device *dev, struct device_attribute *attr,
+			      const char *buf, size_t count)
 {
 	acpi_handle device;
 	acpi_status status;
@@ -65,13 +65,13 @@ ssize_t acpi_method_0_0_write(struct device *dev,
 	else
 		printk("Failed to execute %s\n", path);
 
- err:
+err:
 	return count;
 }
 
 static char acpi_method_name[80];
-ssize_t acpi_method_0_1_read(struct device *dev,
-	struct device_attribute *attr, char *buf)
+ssize_t acpi_method_0_1_read(struct device *dev, struct device_attribute *attr,
+			     char *buf)
 {
 	acpi_status status;
 	unsigned long long output;
@@ -86,14 +86,14 @@ ssize_t acpi_method_0_1_read(struct device *dev,
 }
 
 static u32 acpi_arg0;
-ssize_t acpi_arg0_read(struct device *dev,
-		struct device_attribute *attr, char *buf)
+ssize_t acpi_arg0_read(struct device *dev, struct device_attribute *attr,
+		       char *buf)
 {
 	return sprintf(buf, "0x%08x\n", acpi_arg0);
 }
 
-ssize_t acpi_arg0_write(struct device *dev,
-		struct device_attribute *attr, const char *buf, size_t count)
+ssize_t acpi_arg0_write(struct device *dev, struct device_attribute *attr,
+			const char *buf, size_t count)
 {
 	acpi_arg0 = simple_strtoul(buf, NULL, 16);
 
@@ -101,22 +101,22 @@ ssize_t acpi_arg0_write(struct device *dev,
 }
 
 static u32 acpi_arg1;
-ssize_t acpi_arg1_read(struct device *dev,
-		struct device_attribute *attr, char *buf)
+ssize_t acpi_arg1_read(struct device *dev, struct device_attribute *attr,
+		       char *buf)
 {
 	return sprintf(buf, "0x%08x\n", acpi_arg1);
 }
 
-ssize_t acpi_arg1_write(struct device *dev,
-		struct device_attribute *attr, const char *buf, size_t count)
+ssize_t acpi_arg1_write(struct device *dev, struct device_attribute *attr,
+			const char *buf, size_t count)
 {
 	acpi_arg1 = simple_strtoul(buf, NULL, 16);
 
 	return count;
 }
 
-ssize_t acpi_method_1_0_read(struct device *dev,
-		struct device_attribute *attr, char *buf)
+ssize_t acpi_method_1_0_read(struct device *dev, struct device_attribute *attr,
+			     char *buf)
 {
 	acpi_status status;
 
@@ -130,7 +130,8 @@ ssize_t acpi_method_1_0_read(struct device *dev,
 }
 
 ssize_t acpi_method_name_write(struct device *dev,
-		struct device_attribute *attr, const char *buf, size_t count)
+			       struct device_attribute *attr, const char *buf,
+			       size_t count)
 {
 	acpi_handle device;
 	acpi_status status;
@@ -145,13 +146,13 @@ ssize_t acpi_method_name_write(struct device *dev,
 	return count;
 }
 
-ssize_t acpi_method_1_1_read(struct device *dev,
-		struct device_attribute *attr, char *buf)
+ssize_t acpi_method_1_1_read(struct device *dev, struct device_attribute *attr,
+			     char *buf)
 {
 	acpi_status status;
 	unsigned long long output;
-	union acpi_object arg0 = { ACPI_TYPE_INTEGER };
-	struct acpi_object_list args = { 1, &arg0 };
+	union acpi_object arg0 = {ACPI_TYPE_INTEGER};
+	struct acpi_object_list args = {1, &arg0};
 
 	arg0.integer.value = acpi_arg0;
 
@@ -164,16 +165,14 @@ ssize_t acpi_method_1_1_read(struct device *dev,
 	return sprintf(buf, "0x%08llx\n", output);
 }
 
-ssize_t acpi_method_2_0_read(struct device *dev,
-		struct device_attribute *attr, char *buf)
+ssize_t acpi_method_2_0_read(struct device *dev, struct device_attribute *attr,
+			     char *buf)
 {
 	acpi_status status;
 	unsigned long long output;
-	union acpi_object arg_objs[] = {
-		{ACPI_TYPE_INTEGER},
-		{ACPI_TYPE_INTEGER}
-	};
-	struct acpi_object_list args = { 2, arg_objs };
+	union acpi_object arg_objs[] = {{ACPI_TYPE_INTEGER},
+					{ACPI_TYPE_INTEGER}};
+	struct acpi_object_list args = {2, arg_objs};
 
 	arg_objs[0].integer.value = acpi_arg0;
 	arg_objs[1].integer.value = acpi_arg1;
@@ -187,16 +186,14 @@ ssize_t acpi_method_2_0_read(struct device *dev,
 	return sprintf(buf, "0x%08x\n", ACPI_SUCCESS(status));
 }
 
-ssize_t acpi_method_2_1_read(struct device *dev,
-		struct device_attribute *attr, char *buf)
+ssize_t acpi_method_2_1_read(struct device *dev, struct device_attribute *attr,
+			     char *buf)
 {
 	acpi_status status;
 	unsigned long long output;
-	union acpi_object arg_objs[] = {
-		{ACPI_TYPE_INTEGER},
-		{ACPI_TYPE_INTEGER}
-	};
-	struct acpi_object_list args = { 2, arg_objs };
+	union acpi_object arg_objs[] = {{ACPI_TYPE_INTEGER},
+					{ACPI_TYPE_INTEGER}};
+	struct acpi_object_list args = {2, arg_objs};
 
 	arg_objs[0].integer.value = acpi_arg0;
 	arg_objs[1].integer.value = acpi_arg1;
@@ -231,7 +228,7 @@ int handle_acpi_aml_cmd(fwdt_generic __user *fg)
 	if (unlikely(copy_to_user(fg, &fd, sizeof(struct fwdt_acpi_data))))
 		return -EFAULT;
 
- err:
+err:
 	return ret;
 }
 
