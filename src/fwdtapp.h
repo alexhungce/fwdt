@@ -1,7 +1,7 @@
 /*
  * FWDT driver
  *
- * Copyright(C) 2014-2018 Canonical Ltd.
+ * Copyright(C) 2014-2019 Canonical Ltd.
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
