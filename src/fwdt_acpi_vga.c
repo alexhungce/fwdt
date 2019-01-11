@@ -56,10 +56,10 @@ ssize_t acpi_video_write_device(struct device *dev,
 				size_t count)
 {
 	acpi_status status;
-	char device_path[255];
+	char device_path[ACPI_PATH_SIZE];
 
 	device_path[0] = '\\';
-	strncpy(device_path + 1, buf, strlen(buf));
+	strncpy(device_path + 1, buf, ACPI_PATH_SIZE - 2);
 	device_path[strlen(buf)] = 0;
 
 	status = acpi_get_handle(NULL, device_path, &video_device);

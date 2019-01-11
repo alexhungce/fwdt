@@ -38,8 +38,8 @@ void acpi_device_path(const char *buf, char *path)
 {
 	path[0] = '\\';
 	if (strlen(buf) < 80) {
-		strncpy(path + 1, buf, strlen(buf));
-		path[strlen(buf)] = 0;
+		strncpy(path + 1, buf, ACPI_PATH_SIZE - 2);
+		path[strlen(buf) - 1] = 0;
 	} else
 		path[1] = 0;
 }
@@ -49,7 +49,7 @@ ssize_t acpi_method_0_0_write(struct device *dev, struct device_attribute *attr,
 {
 	acpi_handle device;
 	acpi_status status;
-	char path[80];
+	char path[ACPI_PATH_SIZE];
 
 	acpi_device_path(buf, path);
 

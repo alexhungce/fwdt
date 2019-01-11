@@ -22,6 +22,8 @@
 
 #ifdef CONFIG_ACPI
 
+#define ACPI_PATH_SIZE  80
+
 /* ACPI functions */
 acpi_status acpi_handle_locate_callback(acpi_handle handle, u32 level,
 					void *context, void **return_value);
