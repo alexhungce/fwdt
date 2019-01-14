@@ -37,7 +37,6 @@ ssize_t ec_read_data(struct device *dev, struct device_attribute *attr,
 		return -EINVAL;
 
 	return sprintf(buf, "%x\n", data);
-	;
 }
 
 ssize_t ec_write_data(struct device *dev, struct device_attribute *attr,
@@ -58,7 +57,6 @@ ssize_t ec_read_addr(struct device *dev, struct device_attribute *attr,
 		     char *buf)
 {
 	return sprintf(buf, "0x%02x\n", ec_offset);
-	;
 }
 
 ssize_t ec_write_addr(struct device *dev, struct device_attribute *attr,
