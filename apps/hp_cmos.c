@@ -1,7 +1,7 @@
 /*
  * FWDT sample for reading CMOS error on HP laptops
  *
- * Copyright(C) 2014-2019 Canonical Ltd.
+ * Copyright(C) 2014-2021 Canonical Ltd.
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
