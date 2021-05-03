@@ -57,37 +57,7 @@ def _IOW(type, nr, size): return _IOC(_IOC_WRITE, type, nr, size)
 def _IOWR(type, nr, size): return _IOC(_IOC_READ | _IOC_WRITE, type, nr, size)
 # end of Linux ioctl numbers in Python
 
-funcSelection = ["Help", "VGA", "I/O", "MEMORY", "CMOS", "EC", "ACPI"]
-funcs = {"help": 0, "vga": 1, "io": 2, "memory": 3, "cmos": 4, "ec": 5, "acpi": 6}
 fwdtSysFile = "/dev/fwdt"
-
-def userSelectMenu(argv):
-
-    if len(argv) == 1:
-        os.system('clear')
-        for index, selection in enumerate(funcSelection):
-            print(index, selection)
-
-        try:
-            userSelect = int(input("Selection Function: "))
-            if userSelect > len(funcSelection) - 1:
-                userSelect = -1
-        except:
-            userSelect = -1
-        if userSelect == -1:
-            print("Error: Invalid input: ", userSelect)
-
-    elif len(argv) == 2:
-        try:
-            userSelect = funcs[argv[1]]
-        except KeyError:
-            userSelect = -1
-            print("Error: Unsupport function: ", argv[1])
-    else:
-        print("Error: Invalid arguments")
-        userSelect = -1
-
-    return userSelect
 
 def getIoNum(cmd):
     if cmd == 'vga':
@@ -144,16 +114,6 @@ def ecRead(addr):
 
 def main():
 
-    os.system('clear')
-    userSelect = userSelectMenu(sys.argv)
-    if userSelect == -1:
-        exit()
-
-    try:
-        print("==", funcSelection[userSelect], "==")
-    except IndexError:
-        print("Selection is out of range!")
-        exit()
 
 #    print(cmosRead(0)) # this is a cmos read example
 #    print(hex(ioReadWord(0x1830))) # this is an io read example
