@@ -3,8 +3,6 @@ apps/hp_cmos
 apps/fwdt
 bin/
 install.sh
-src/.*.ko.cmd
-src/.*.o.cmd
 src/.tmp_versions/
 src/Module.symvers
 src/*.ko
@@ -13,3 +11,6 @@ src/*.o
 src/modules.order
 *.swp
 .gitignore
+*.cmd
+*.mod
+*.patch
