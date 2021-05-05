@@ -187,6 +187,7 @@ def main():
     write_op = False
     parser = argparse.ArgumentParser(description='FWDT utility.')
     parser.add_argument("-c", "--cmos", help="Read CMOS registers")
+    parser.add_argument("-e", "--ec", nargs='+', help="Read & Write EC registers")
     parser.add_argument("--iob", nargs='+', help="Read & Write I/O byte-access registers")
     parser.add_argument("--iow", nargs='+', help="Read & Write I/O word-access registers")
     parser.add_argument("-m", "--msr", help="Read MSR registers")
@@ -219,6 +220,17 @@ def main():
             ''' Write to an I/O port '''
             iow.write_address(args.iow[0])
             iow.write_data(args.iow[1])
+            write_op = True
+    elif args.ec:
+        ec = FWDT_IO('ec_address', 'ec_data')
+        if len(args.ec) == 1:
+            ''' read from EC '''
+            ec.write_address(args.ec[0])
+            val = ec.read_data()
+        elif len(args.ec) == 2:
+            ''' Write to EC '''
+            ec.write_address(args.ec[0])
+            ec.write_data(args.ec[1])
             write_op = True
 
 
