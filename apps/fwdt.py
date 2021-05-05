@@ -11,10 +11,7 @@
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
 
-import os
-import sys
-import fcntl
-import array
+import os, sys, fcntl, array, argparse
 
 from struct import *
 
@@ -58,6 +55,51 @@ def _IOWR(type, nr, size): return _IOC(_IOC_READ | _IOC_WRITE, type, nr, size)
 # end of Linux ioctl numbers in Python
 
 fwdtSysFile = "/dev/fwdt"
+
+
+class FWDT_Obj(object):
+
+    def __init__(self):
+        self.dev = '/dev/fwdt'
+        self.sys = '/sys/bus/platform/devices/fwdt'
+
+        if not os.path.exists(self.sys) or not os.path.exists(self.dev):
+            sys.exit(-1)
+
+    def get_device(self):
+        return self.dev
+
+    def get_sysfs(self):
+        return self.sys
+
+class FWDT_SIMPLE(FWDT_Obj):
+    def __init__(self):
+        FWDT_Obj.__init__(self)
+
+    def get_register(self, reg):
+        self.__set_register(reg)
+        f = open(self.sys, 'r')
+        value = f.read()
+        f.close()
+        return value
+
+    def __set_register(self, reg):
+        f = open(self.sys, 'w')
+        f.write(reg)
+        f.close()
+        return
+
+class FWDT_MSR(FWDT_SIMPLE):
+
+    def __init__(self):
+        FWDT_Obj.__init__(self)
+        self.sys = os.path.join(self.sys, 'msr')
+
+class FWDT_CMOS(FWDT_SIMPLE):
+
+    def __init__(self):
+        FWDT_Obj.__init__(self)
+        self.sys = os.path.join(self.sys, 'cmos')
 
 def getIoNum(cmd):
     if cmd == 'vga':
@@ -114,9 +156,20 @@ def ecRead(addr):
 
 def main():
 
+    parser = argparse.ArgumentParser(description='FWDT utility.')
+    parser.add_argument("-c", "--cmos", help="Read CMOS registers")
+    parser.add_argument("-m", "--msr", help="Read MSR registers")
+    args = parser.parse_args()
 
-#    print(cmosRead(0)) # this is a cmos read example
-#    print(hex(ioReadWord(0x1830))) # this is an io read example
+    if args.msr:
+        msr = FWDT_MSR()
+        val = msr.get_register(args.msr)
+    elif args.cmos:
+        cmos = FWDT_CMOS()
+        val = cmos.get_register(args.cmos)
+
+    print(val)
+
 
 if __name__ == "__main__":
     main()
