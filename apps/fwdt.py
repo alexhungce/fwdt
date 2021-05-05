@@ -56,7 +56,6 @@ def _IOWR(type, nr, size): return _IOC(_IOC_READ | _IOC_WRITE, type, nr, size)
 
 fwdtSysFile = "/dev/fwdt"
 
-
 class FWDT_Obj(object):
 
     def __init__(self):
@@ -88,6 +87,36 @@ class FWDT_SIMPLE(FWDT_Obj):
         f.write(reg)
         f.close()
         return
+
+class FWDT_IO(FWDT_Obj):
+    def __init__(self, address, data):
+        FWDT_Obj.__init__(self)
+        self.address = os.path.join(self.sys, address)
+        self.data = os.path.join(self.sys, data)
+
+    def read_data(self):
+        return self.__read_file(self.data)
+
+    def write_data(self, data):
+        f = open(self.data, 'w')
+        f.write(data)
+        f.close()
+        return
+
+    def read_address(self):
+        return self.__read_file(self.address)
+
+    def write_address(self, addr):
+        f = open(self.address, 'w')
+        f.write(addr)
+        f.close()
+        return
+
+    def __read_file(self, file):
+        f = open(file, 'r')
+        value = f.read()
+        f.close()
+        return value
 
 class FWDT_MSR(FWDT_SIMPLE):
 
@@ -155,21 +184,33 @@ def ecRead(addr):
     return buf[5]
 
 def main():
-
+    write_op = False
     parser = argparse.ArgumentParser(description='FWDT utility.')
     parser.add_argument("-c", "--cmos", help="Read CMOS registers")
+    parser.add_argument("--iob", nargs='+', help="Read & Write I/O byte-access registers")
     parser.add_argument("-m", "--msr", help="Read MSR registers")
-    args = parser.parse_args()
 
+    args = parser.parse_args()
     if args.msr:
         msr = FWDT_MSR()
         val = msr.get_register(args.msr)
     elif args.cmos:
         cmos = FWDT_CMOS()
         val = cmos.get_register(args.cmos)
+    elif args.iob:
+        iob = FWDT_IO('io_address', 'iob_data')
+        if len(args.iob) == 1:
+            ''' read from an I/O port '''
+            iob.write_address(args.iob[0])
+            val = iob.read_data()
+        elif len(args.iob) == 2:
+            ''' Write to an I/O port '''
+            iob.write_address(args.iob[0])
+            iob.write_data(args.iob[1])
+            write_op = True
 
-    print(val)
-
+    if not write_op:
+        print(val.strip())
 
 if __name__ == "__main__":
     main()
