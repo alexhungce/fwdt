@@ -101,6 +101,16 @@ class FWDT_IO(FWDT_Obj):
     def write_data(self, data):
         self.write_sysfs(self.data, data)
 
+class FWDT_EC(FWDT_IO):
+    def __init__(self, address, data):
+        FWDT_Obj.__init__(self)
+        self.address = os.path.join(self.sys, address)
+        self.data = os.path.join(self.sys, data)
+
+    def execute_qxx(self, num):
+        q_method = os.path.join(self.sys, 'ec_qmethod')
+        self.write_sysfs(q_method, num)
+
 class FWDT_MSR(FWDT_SIMPLE):
     def __init__(self):
         FWDT_Obj.__init__(self)
@@ -188,6 +198,7 @@ def main():
     parser = argparse.ArgumentParser(description='FWDT utility.')
     parser.add_argument("-c", "--cmos", help="Read CMOS registers")
     parser.add_argument("-e", "--ec", nargs='+', help="Read & Write EC registers")
+    parser.add_argument("--eq", help="Execute ACPI EC _Qxx method")
     parser.add_argument("--iob", nargs='+', help="Read & Write I/O byte-access registers")
     parser.add_argument("--iow", nargs='+', help="Read & Write I/O word-access registers")
     parser.add_argument("-m", "--msr", help="Read MSR registers")
@@ -223,7 +234,7 @@ def main():
             iow.write_data(args.iow[1])
             write_op = True
     elif args.ec:
-        ec = FWDT_IO('ec_address', 'ec_data')
+        ec = FWDT_EC('ec_address', 'ec_data')
         if len(args.ec) == 1:
             ''' read from EC '''
             ec.write_address(args.ec[0])
@@ -233,6 +244,10 @@ def main():
             ec.write_address(args.ec[0])
             ec.write_data(args.ec[1])
             write_op = True
+    elif args.eq:
+        ec = FWDT_EC('ec_address', 'ec_data')
+        ec.execute_qxx(args.eq)
+        write_op = True
     elif args.pci:
         pci = FWDT_PCI()
         if len(args.pci) == 2:
