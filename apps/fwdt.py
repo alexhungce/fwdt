@@ -57,7 +57,6 @@ def _IOWR(type, nr, size): return _IOC(_IOC_READ | _IOC_WRITE, type, nr, size)
 fwdtSysFile = "/dev/fwdt"
 
 class FWDT_Obj(object):
-
     def __init__(self):
         self.dev = '/dev/fwdt'
         self.sys = '/sys/bus/platform/devices/fwdt'
@@ -65,28 +64,27 @@ class FWDT_Obj(object):
         if not os.path.exists(self.sys) or not os.path.exists(self.dev):
             sys.exit(-1)
 
-    def get_device(self):
-        return self.dev
+    def write_sysfs(self, sysfs, data):
+        f = open(sysfs, 'w')
+        f.write(data)
+        f.close()
 
-    def get_sysfs(self):
-        return self.sys
+    def read_sysfs(self, sysfs):
+        f = open(sysfs, 'r')
+        value = f.read()
+        f.close()
+        return value
 
 class FWDT_SIMPLE(FWDT_Obj):
     def __init__(self):
         FWDT_Obj.__init__(self)
 
     def get_register(self, reg):
-        self.__set_register(reg)
+        self.write_sysfs(self.sys ,reg)
         f = open(self.sys, 'r')
         value = f.read()
         f.close()
         return value
-
-    def __set_register(self, reg):
-        f = open(self.sys, 'w')
-        f.write(reg)
-        f.close()
-        return
 
 class FWDT_IO(FWDT_Obj):
     def __init__(self, address, data):
@@ -94,38 +92,21 @@ class FWDT_IO(FWDT_Obj):
         self.address = os.path.join(self.sys, address)
         self.data = os.path.join(self.sys, data)
 
+    def write_address(self, addr):
+        self.write_sysfs(self.address, addr)
+
     def read_data(self):
-        return self.__read_file(self.data)
+        return self.read_sysfs(self.data)
 
     def write_data(self, data):
-        f = open(self.data, 'w')
-        f.write(data)
-        f.close()
-        return
-
-    def read_address(self):
-        return self.__read_file(self.address)
-
-    def write_address(self, addr):
-        f = open(self.address, 'w')
-        f.write(addr)
-        f.close()
-        return
-
-    def __read_file(self, file):
-        f = open(file, 'r')
-        value = f.read()
-        f.close()
-        return value
+        self.write_sysfs(self.data, data)
 
 class FWDT_MSR(FWDT_SIMPLE):
-
     def __init__(self):
         FWDT_Obj.__init__(self)
         self.sys = os.path.join(self.sys, 'msr')
 
 class FWDT_CMOS(FWDT_SIMPLE):
-
     def __init__(self):
         FWDT_Obj.__init__(self)
         self.sys = os.path.join(self.sys, 'cmos')
@@ -138,24 +119,16 @@ class FWDT_PCI(FWDT_Obj):
         self.pci_data = os.path.join(self.sys, 'pci_data')
 
     def write_id(self, id):
-        self.__write_file(self.pci_id, id)
+        self.write_sysfs(self.pci_id, id)
 
     def write_reg(self, reg):
-        self.__write_file(self.pci_reg, reg)
+        self.write_sysfs(self.pci_reg, reg)
 
     def write_data(self, data):
-        self.__write_file(self.pci_data, data)
+        self.write_sysfs(self.pci_data, data)
 
     def read_data(self):
-        f = open(self.pci_data, 'r')
-        value = f.read()
-        f.close()
-        return value
-
-    def __write_file(self, file, data):
-        f = open(file, 'w')
-        f.write(data)
-        f.close()
+        return self.read_sysfs(self.pci_data)
 
 def getIoNum(cmd):
     if cmd == 'vga':
@@ -262,7 +235,6 @@ def main():
             write_op = True
     elif args.pci:
         pci = FWDT_PCI()
-        print(args.pci)
         if len(args.pci) == 2:
             ''' read from PCI '''
             pci.write_id(args.pci[0])
