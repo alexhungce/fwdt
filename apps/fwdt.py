@@ -130,6 +130,33 @@ class FWDT_CMOS(FWDT_SIMPLE):
         FWDT_Obj.__init__(self)
         self.sys = os.path.join(self.sys, 'cmos')
 
+class FWDT_PCI(FWDT_Obj):
+    def __init__(self):
+        FWDT_Obj.__init__(self)
+        self.pci_id = os.path.join(self.sys, 'pci_id')
+        self.pci_reg = os.path.join(self.sys, 'pci_reg')
+        self.pci_data = os.path.join(self.sys, 'pci_data')
+
+    def write_id(self, id):
+        self.__write_file(self.pci_id, id)
+
+    def write_reg(self, reg):
+        self.__write_file(self.pci_reg, reg)
+
+    def write_data(self, data):
+        self.__write_file(self.pci_data, data)
+
+    def read_data(self):
+        f = open(self.pci_data, 'r')
+        value = f.read()
+        f.close()
+        return value
+
+    def __write_file(self, file, data):
+        f = open(file, 'w')
+        f.write(data)
+        f.close()
+
 def getIoNum(cmd):
     if cmd == 'vga':
         return _IOWR(ord('p'), 1, 1288)
@@ -191,6 +218,7 @@ def main():
     parser.add_argument("--iob", nargs='+', help="Read & Write I/O byte-access registers")
     parser.add_argument("--iow", nargs='+', help="Read & Write I/O word-access registers")
     parser.add_argument("-m", "--msr", help="Read MSR registers")
+    parser.add_argument("-p", "--pci", nargs='+', help="Read & Write PCI registers")
 
     args = parser.parse_args()
     if args.msr:
@@ -231,6 +259,20 @@ def main():
             ''' Write to EC '''
             ec.write_address(args.ec[0])
             ec.write_data(args.ec[1])
+            write_op = True
+    elif args.pci:
+        pci = FWDT_PCI()
+        print(args.pci)
+        if len(args.pci) == 2:
+            ''' read from PCI '''
+            pci.write_id(args.pci[0])
+            pci.write_reg(args.pci[1])
+            val = pci.read_data()
+        elif len(args.pci) == 3:
+            ''' Write to PCI '''
+            pci.write_id(args.pci[0])
+            pci.write_reg(args.pci[1])
+            pci.write_data(args.pci[2])
             write_op = True
 
 
