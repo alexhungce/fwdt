@@ -54,14 +54,11 @@ def _IOW(type, nr, size): return _IOC(_IOC_WRITE, type, nr, size)
 def _IOWR(type, nr, size): return _IOC(_IOC_READ | _IOC_WRITE, type, nr, size)
 # end of Linux ioctl numbers in Python
 
-fwdtSysFile = "/dev/fwdt"
-
 class FWDT_Obj(object):
     def __init__(self):
-        self.dev = '/dev/fwdt'
         self.sys = '/sys/bus/platform/devices/fwdt'
 
-        if not os.path.exists(self.sys) or not os.path.exists(self.dev):
+        if not os.path.exists(self.sys):
             sys.exit(-1)
 
     def write_sysfs(self, sysfs, data):
@@ -140,58 +137,65 @@ class FWDT_PCI(FWDT_Obj):
     def read_data(self):
         return self.read_sysfs(self.pci_data)
 
-def getIoNum(cmd):
-    if cmd == 'vga':
-        return _IOWR(ord('p'), 1, 1288)
-    if cmd == 'io':
-        return _IOWR(ord('p'), 2, 8)
-    if cmd == 'memory':
-        return _IOWR(ord('p'), 3, 16)
-    if cmd == 'cmos':
-        return _IOWR(ord('p'), 4, 6)
-    if cmd == 'ec':
-        return _IOWR(ord('p'), 5, 6)
-    if cmd == 'acpi':
-        return _IOWR(ord('p'), 6, 272)
-    return -1
+class FWDT_DEV(object):
+    def __init__(self):
+        self.dev = '/dev/fwdt'
 
-def cmosRead(addr):
-    file = open(fwdtSysFile)
-    buf = array.array('B', pack('HHBB', 1, 0, addr, 0))
-    fcntl.ioctl(file, getIoNum('cmos'), buf, 1)
-    file.close
-    return buf[5]
+        if not os.path.exists(self.dev):
+            sys.exit(-1)
 
-def ioReadByte(addr):
-    file = open(fwdtSysFile)
-    buf = array.array('B', pack('HHHB', 1, 0, addr, 0))
-    fcntl.ioctl(file, getIoNum('io'), buf, 1)
-    file.close
-    return buf[6]
+    def getIoNum(self, cmd):
+        if cmd == 'vga':
+            return _IOWR(ord('p'), 1, 1288)
+        if cmd == 'io':
+            return _IOWR(ord('p'), 2, 8)
+        if cmd == 'memory':
+            return _IOWR(ord('p'), 3, 16)
+        if cmd == 'cmos':
+            return _IOWR(ord('p'), 4, 6)
+        if cmd == 'ec':
+            return _IOWR(ord('p'), 5, 6)
+        if cmd == 'acpi':
+            return _IOWR(ord('p'), 6, 272)
+        return -1
 
-def ioReadWord(addr):
-    file = open(fwdtSysFile)
-    buf = array.array('B', pack('HHHH', 3, 0, addr, 0))
-    fcntl.ioctl(file, getIoNum('io'), buf, 1)
-    file.close
-    return buf[6] + (buf[7] << 8)
+    def cmosRead(self, addr):
+        file = open(self.dev)
+        buf = array.array('B', pack('HHBB', 1, 0, addr, 0))
+        fcntl.ioctl(file, self.getIoNum('cmos'), buf, 1)
+        file.close
+        return buf[5]
 
-def ecCheck():
-    present = False
-    file = open(fwdtSysFile)
-    buf = array.array('B', pack('HHBB', 4, 0, 0, 0))
-    fcntl.ioctl(file, getIoNum('ec'), buf, 1)
-    file.close
-    if buf[0] + (buf[1] << 8) == 0:
-        present = True
-    return present
+    def ioReadByte(self, addr):
+        file = open(self.dev)
+        buf = array.array('B', pack('HHHB', 1, 0, addr, 0))
+        fcntl.ioctl(file, self.getIoNum('io'), buf, 1)
+        file.close
+        return buf[6]
 
-def ecRead(addr):
-    file = open(fwdtSysFile)
-    buf = array.array('B', pack('HHBB', 1, 0, addr, 0))
-    fcntl.ioctl(file, getIoNum('ec'), buf, 1)
-    file.close
-    return buf[5]
+    def ioReadWord(self, addr):
+        file = open(self.dev)
+        buf = array.array('B', pack('HHHH', 3, 0, addr, 0))
+        fcntl.ioctl(file, self.getIoNum('io'), buf, 1)
+        file.close
+        return buf[6] + (buf[7] << 8)
+
+    def ecCheck(self):
+        present = False
+        file = open(self.dev)
+        buf = array.array('B', pack('HHBB', 4, 0, 0, 0))
+        fcntl.ioctl(file, self.getIoNum('ec'), buf, 1)
+        file.close
+        if buf[0] + (buf[1] << 8) == 0:
+            present = True
+        return present
+
+    def ecRead(self, addr):
+        file = open(self.dev)
+        buf = array.array('B', pack('HHBB', 1, 0, addr, 0))
+        fcntl.ioctl(file, self.getIoNum('ec'), buf, 1)
+        file.close
+        return buf[5]
 
 def main():
     write_op = False
