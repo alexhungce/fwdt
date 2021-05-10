@@ -86,7 +86,7 @@ class FWDT_SIMPLE(FWDT_Obj):
         f.close()
         return value
 
-class FWDT_IO(FWDT_Obj):
+class FWDT_IOMEM(FWDT_Obj):
     def __init__(self, address, data):
         FWDT_Obj.__init__(self)
         self.address = os.path.join(self.sys, address)
@@ -101,7 +101,7 @@ class FWDT_IO(FWDT_Obj):
     def write_data(self, data):
         self.write_sysfs(self.data, data)
 
-class FWDT_EC(FWDT_IO):
+class FWDT_EC(FWDT_IOMEM):
     def __init__(self, address, data):
         FWDT_Obj.__init__(self)
         self.address = os.path.join(self.sys, address)
@@ -110,21 +110,6 @@ class FWDT_EC(FWDT_IO):
     def execute_qxx(self, num):
         q_method = os.path.join(self.sys, 'ec_qmethod')
         self.write_sysfs(q_method, num)
-
-class FWDT_MEMORY(FWDT_Obj):
-    def __init__(self, address, data):
-        FWDT_Obj.__init__(self)
-        self.address = os.path.join(self.sys, address)
-        self.data = os.path.join(self.sys, data)
-
-    def write_address(self, addr):
-        self.write_sysfs(self.address, addr)
-
-    def read_data(self):
-        return self.read_sysfs(self.data)
-
-    def write_data(self, data):
-        self.write_sysfs(self.data, data)
 
 class FWDT_MSR(FWDT_SIMPLE):
     def __init__(self):
@@ -228,7 +213,7 @@ def main():
         cmos = FWDT_CMOS()
         val = cmos.get_register(args.cmos)
     elif args.iob:
-        iob = FWDT_IO('io_address', 'iob_data')
+        iob = FWDT_IOMEM('io_address', 'iob_data')
         if len(args.iob) == 1:
             ''' read from an I/O port '''
             iob.write_address(args.iob[0])
@@ -239,7 +224,7 @@ def main():
             iob.write_data(args.iob[1])
             write_op = True
     elif args.iow:
-        iow = FWDT_IO('io_address', 'iow_data')
+        iow = FWDT_IOMEM('io_address', 'iow_data')
         if len(args.iow) == 1:
             ''' read from an I/O port '''
             iow.write_address(args.iow[0])
@@ -278,7 +263,7 @@ def main():
             pci.write_data(args.pci[2])
             write_op = True
     elif args.memory:
-        memory = FWDT_MEMORY('mem_address', 'mem_data')
+        memory = FWDT_IOMEM('mem_address', 'mem_data')
         if len(args.memory) == 1:
             ''' read from memory '''
             memory.write_address(args.memory[0])
