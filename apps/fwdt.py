@@ -111,6 +111,21 @@ class FWDT_EC(FWDT_IO):
         q_method = os.path.join(self.sys, 'ec_qmethod')
         self.write_sysfs(q_method, num)
 
+class FWDT_MEMORY(FWDT_Obj):
+    def __init__(self, address, data):
+        FWDT_Obj.__init__(self)
+        self.address = os.path.join(self.sys, address)
+        self.data = os.path.join(self.sys, data)
+
+    def write_address(self, addr):
+        self.write_sysfs(self.address, addr)
+
+    def read_data(self):
+        return self.read_sysfs(self.data)
+
+    def write_data(self, data):
+        self.write_sysfs(self.data, data)
+
 class FWDT_MSR(FWDT_SIMPLE):
     def __init__(self):
         FWDT_Obj.__init__(self)
@@ -201,7 +216,8 @@ def main():
     parser.add_argument("--eq", help="Execute ACPI EC _Qxx method")
     parser.add_argument("--iob", nargs='+', help="Read & Write I/O byte-access registers")
     parser.add_argument("--iow", nargs='+', help="Read & Write I/O word-access registers")
-    parser.add_argument("-m", "--msr", help="Read MSR registers")
+    parser.add_argument("-m", "--memory", nargs='+', help="Read & Write memory")
+    parser.add_argument("--msr", help="Read MSR registers")
     parser.add_argument("-p", "--pci", nargs='+', help="Read & Write PCI registers")
 
     args = parser.parse_args()
@@ -260,6 +276,17 @@ def main():
             pci.write_id(args.pci[0])
             pci.write_reg(args.pci[1])
             pci.write_data(args.pci[2])
+            write_op = True
+    elif args.memory:
+        memory = FWDT_MEMORY('mem_address', 'mem_data')
+        if len(args.memory) == 1:
+            ''' read from memory '''
+            memory.write_address(args.memory[0])
+            val = memory.read_data()
+        elif len(args.memory) == 2:
+            ''' Write to memory '''
+            memory.write_address(args.memory[0])
+            memory.write_data(args.memory[1])
             write_op = True
 
 
