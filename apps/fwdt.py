@@ -59,6 +59,7 @@ class FWDT_Obj(object):
         self.sys = '/sys/bus/platform/devices/fwdt'
 
         if not os.path.exists(self.sys):
+            print("fwdt device driver is not found! Exiting...")
             sys.exit(-1)
 
     def write_sysfs(self, sysfs, data):
@@ -142,6 +143,7 @@ class FWDT_DEV(object):
         self.dev = '/dev/fwdt'
 
         if not os.path.exists(self.dev):
+            print("fwdt device driver is not found! Exiting...")
             sys.exit(-1)
 
     def getIoNum(self, cmd):
